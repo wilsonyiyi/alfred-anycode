@@ -4,8 +4,18 @@
   "description": "Search and open any project in any IDE.",
   "main": "index.js",
   "type": "module",
-  "scripts": {},
-  "author": "willworkgogogo@gmail.com",
+  "scripts": {
+    "check": "npm test && npm run validate",
+    "postinstall": "node scripts/install-workflow.js",
+    "prepublishOnly": "npm run check",
+    "preuninstall": "node scripts/uninstall-workflow.js",
+    "test": "node --test",
+    "validate": "node scripts/validate-workflow.js"
+  },
+  "author": {
+    "name": "Wilson",
+    "email": "willworkgogogo@gmail.com"
+  },
   "keywords": [
     "ide",
     "ide-launcher",
@@ -21,11 +31,34 @@
     "vscode",
     "cursor",
     "webstorm",
-    "jetbrains",
-    "zed"
+    "zed",
+    "codex"
   ],
-  "license": "ISC",
+  "homepage": "https://github.com/wilsonyiyi/alfred-anycode#readme",
+  "bugs": {
+    "url": "https://github.com/wilsonyiyi/alfred-anycode/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wilsonyiyi/alfred-anycode.git"
+  },
+  "license": "GPL-3.0-or-later",
+  "engines": {
+    "node": ">=20"
+  },
+  "files": [
+    "46CF5385-7B12-47EC-A34B-D36168267B0A.png",
+    "A230553D-D083-45EE-AAFD-02C49F29CED6.png",
+    "assets/editor-icons",
+    "icon.png",
+    "index.js",
+    "info.plist",
+    "LICENSE",
+    "README.md",
+    "scripts",
+    "src"
+  ],
   "dependencies": {
-    "alfy": "^3.1.0"
+    "fast-glob": "^3.3.3"
   }
 }

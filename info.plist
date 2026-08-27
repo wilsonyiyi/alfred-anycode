@@ -7,17 +7,116 @@
 	<key>category</key>
 	<string>Productivity</string>
 	<key>connections</key>
-	<dict/>
+	<dict>
+		<key>46CF5385-7B12-47EC-A34B-D36168267B0A</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>950A4362-3515-4A4C-B733-916A9DF9D41A</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
+		<key>A230553D-D083-45EE-AAFD-02C49F29CED6</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>950A4362-3515-4A4C-B733-916A9DF9D41A</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
+	</dict>
 	<key>createdby</key>
-	<string>Wilson</string>
+	<string>Wilsonyiyi</string>
 	<key>description</key>
-	<string>Search and open any project in any IDE.</string>
+	<string>Search projects and open them in any IDE.</string>
 	<key>disabled</key>
 	<false/>
 	<key>name</key>
-	<string>Alfred AnyCode</string>
+	<string>AnyCode</string>
 	<key>objects</key>
 	<array>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>alfredfiltersresults</key>
+				<false/>
+				<key>alfredfiltersresultsmatchmode</key>
+				<integer>0</integer>
+				<key>argumenttreatemptyqueryasnil</key>
+				<true/>
+				<key>argumenttrimmode</key>
+				<integer>0</integer>
+				<key>argumenttype</key>
+				<integer>1</integer>
+				<key>escaping</key>
+				<integer>102</integer>
+				<key>keyword</key>
+				<string>anycode</string>
+				<key>queuedelaycustom</key>
+				<integer>3</integer>
+				<key>queuedelayimmediatelyinitially</key>
+				<true/>
+				<key>queuedelaymode</key>
+				<integer>0</integer>
+				<key>queuemode</key>
+				<integer>1</integer>
+				<key>runningsubtext</key>
+				<string>Loading AnyCode settings…</string>
+				<key>script</key>
+				<string>./scripts/run-node.sh index.js "$1"</string>
+				<key>scriptargtype</key>
+				<integer>1</integer>
+				<key>scriptfile</key>
+				<string></string>
+				<key>subtext</key>
+				<string>Manage project folders, editor keywords, and custom icons</string>
+				<key>title</key>
+				<string>Open AnyCode Settings</string>
+				<key>type</key>
+				<integer>0</integer>
+				<key>withspace</key>
+				<false/>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.input.scriptfilter</string>
+			<key>uid</key>
+			<string>A230553D-D083-45EE-AAFD-02C49F29CED6</string>
+			<key>version</key>
+			<integer>3</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>concurrently</key>
+				<false/>
+				<key>escaping</key>
+				<integer>102</integer>
+				<key>script</key>
+				<string>./scripts/run-node.sh scripts/run-action.js "$1"</string>
+				<key>scriptargtype</key>
+				<integer>1</integer>
+				<key>scriptfile</key>
+				<string></string>
+				<key>type</key>
+				<integer>0</integer>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.action.script</string>
+			<key>uid</key>
+			<string>950A4362-3515-4A4C-B733-916A9DF9D41A</string>
+			<key>version</key>
+			<integer>2</integer>
+		</dict>
 		<dict>
 			<key>config</key>
 			<dict>
@@ -34,7 +133,7 @@
 				<key>escaping</key>
 				<integer>102</integer>
 				<key>keyword</key>
-				<string>code</string>
+				<string>code||c||z||codex</string>
 				<key>queuedelaycustom</key>
 				<integer>3</integer>
 				<key>queuedelayimmediatelyinitially</key>
@@ -46,13 +145,13 @@
 				<key>runningsubtext</key>
 				<string>Searching projects…</string>
 				<key>script</key>
-				<string>./node_modules/.bin/run-node index.js "$1"</string>
+				<string>./scripts/run-node.sh index.js "$1"</string>
 				<key>scriptargtype</key>
 				<integer>1</integer>
 				<key>scriptfile</key>
 				<string></string>
 				<key>subtext</key>
-				<string>Open a project in your preferred IDE</string>
+				<string>Open a project with this editor</string>
 				<key>title</key>
 				<string>Search projects</string>
 				<key>type</key>
@@ -63,21 +162,35 @@
 			<key>type</key>
 			<string>alfred.workflow.input.scriptfilter</string>
 			<key>uid</key>
-			<string>A230553D-D083-45EE-AAFD-02C49F29CED6</string>
+			<string>46CF5385-7B12-47EC-A34B-D36168267B0A</string>
 			<key>version</key>
 			<integer>3</integer>
 		</dict>
 	</array>
 	<key>readme</key>
-	<string></string>
+	<string>Type “anycode” in Alfred to open the grouped settings interface. Project directories and editors are configured in separate modules. Editors can be added or removed dynamically, and every editor has its own keyword. Custom editors can use an uploaded image.</string>
 	<key>uidata</key>
 	<dict>
+		<key>46CF5385-7B12-47EC-A34B-D36168267B0A</key>
+		<dict>
+			<key>xpos</key>
+			<real>155</real>
+			<key>ypos</key>
+			<real>250</real>
+		</dict>
+		<key>950A4362-3515-4A4C-B733-916A9DF9D41A</key>
+		<dict>
+			<key>xpos</key>
+			<real>435</real>
+			<key>ypos</key>
+			<real>175</real>
+		</dict>
 		<key>A230553D-D083-45EE-AAFD-02C49F29CED6</key>
 		<dict>
 			<key>xpos</key>
 			<real>155</real>
 			<key>ypos</key>
-			<real>175</real>
+			<real>100</real>
 		</dict>
 	</dict>
 	<key>userconfigurationconfig</key>
