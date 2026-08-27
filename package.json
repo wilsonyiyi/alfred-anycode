@@ -1,0 +1,31 @@
+{
+  "name": "alfred-anycode",
+  "version": "1.0.0",
+  "description": "Search and open any project in any IDE.",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {},
+  "author": "willworkgogogo@gmail.com",
+  "keywords": [
+    "ide",
+    "ide-launcher",
+    "ide-switcher",
+    "multi-ide",
+    "open-in-ide",
+    "project-launcher",
+    "project-opener",
+    "code-editor",
+    "alfred",
+    "alfred-workflow",
+    "macos",
+    "vscode",
+    "cursor",
+    "webstorm",
+    "jetbrains",
+    "zed"
+  ],
+  "license": "ISC",
+  "dependencies": {
+    "alfy": "^3.1.0"
+  }
+}
