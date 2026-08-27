@@ -43,9 +43,14 @@ test('configuration server saves dynamic editors, icon images, and Alfred keywor
 <key>config</key><dict><key>keyword</key><string>old</string></dict>
 <key>uid</key><string>${EDITOR_SCRIPT_FILTER_UID}</string>
 </dict>`);
+  const reloadCalls = [];
   const session = await startConfigServer({
     dataDirectory,
-    environment: {HOME: '/Users/example'},
+    environment: {
+      HOME: '/Users/example',
+      alfred_workflow_bundleid: 'com.example.anycode',
+    },
+    reloadWorkflow: async options => reloadCalls.push(options),
     workflowRoot: root,
   });
   t.after(async () => {
@@ -86,6 +91,15 @@ test('configuration server saves dynamic editors, icon images, and Alfred keywor
   assert.equal(body.config.editors.length, 3);
   assert.match(body.config.editors[1].iconUrl, /token=/u);
   assert.equal(body.keywordExpression, 'c||nova||xc');
+  assert.deepEqual(reloadCalls, [{bundleId: 'com.example.anycode'}]);
+
+  const unchangedResponse = await fetch(new URL(`/api/config?token=${session.token}`, base), {
+    body: JSON.stringify(body.config),
+    headers: {'content-type': 'application/json'},
+    method: 'POST',
+  });
+  assert.equal(unchangedResponse.status, 200);
+  assert.equal(reloadCalls.length, 1);
 
   const saved = JSON.parse(await fs.readFile(path.join(dataDirectory, 'config.json'), 'utf8'));
   assert.equal(saved.editors[1].iconUpload, undefined);

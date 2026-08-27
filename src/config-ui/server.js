@@ -2,6 +2,10 @@ import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
 import http from 'node:http';
 import path from 'node:path';
+import {
+  DEFAULT_WORKFLOW_BUNDLE_ID,
+  reloadAlfredWorkflow,
+} from '../alfred/workflow-reloader.js';
 import {createConfigStore} from '../config/config-store.js';
 import {EDITOR_TYPES} from '../config/editor-config.js';
 import {syncWorkflowKeywords} from '../config/keyword-sync.js';
@@ -166,12 +170,26 @@ export async function startConfigServer({
   dataDirectory,
   environment = process.env,
   host = '127.0.0.1',
+  reloadWorkflow = reloadAlfredWorkflow,
   workflowRoot,
 }) {
   const token = crypto.randomBytes(24).toString('hex');
   const store = createConfigStore({dataDirectory, environment});
   let idleTimer;
   let server;
+
+  const syncKeywordsAndReload = async config => {
+    const sync = await syncWorkflowKeywords({
+      config,
+      plistPath: path.join(workflowRoot, 'info.plist'),
+    });
+    if (sync.changed) {
+      await reloadWorkflow({
+        bundleId: environment.alfred_workflow_bundleid || DEFAULT_WORKFLOW_BUNDLE_ID,
+      });
+    }
+    return sync;
+  };
 
   const resetIdleTimer = () => {
     clearTimeout(idleTimer);
@@ -195,10 +213,7 @@ export async function startConfigServer({
 
       if (request.method === 'GET' && requestUrl.pathname === '/api/config') {
         const config = await store.load();
-        await syncWorkflowKeywords({
-          config,
-          plistPath: path.join(workflowRoot, 'info.plist'),
-        });
+        await syncKeywordsAndReload(config);
         json(response, 200, {
           config: publicConfig(config, token),
           editorTypes: EDITOR_TYPES,
@@ -232,10 +247,7 @@ export async function startConfigServer({
           editors: Array.isArray(payload.editors) ? payload.editors : [],
         });
         const config = await store.save({...payload, editors});
-        const sync = await syncWorkflowKeywords({
-          config,
-          plistPath: path.join(workflowRoot, 'info.plist'),
-        });
+        const sync = await syncKeywordsAndReload(config);
         json(response, 200, {config: publicConfig(config, token), keywordExpression: sync.expression});
         return;
       }

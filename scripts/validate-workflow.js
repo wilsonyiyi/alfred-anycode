@@ -28,6 +28,7 @@ const requiredFiles = [
   'src/config-ui/page.js',
   'src/config-ui/server.js',
   'src/config-ui/translations.js',
+  'src/alfred/workflow-reloader.js',
   'src/ides/editor-icon.js',
   'src/ides/editor-registry.js',
   'src/install/workflow-link.js',
