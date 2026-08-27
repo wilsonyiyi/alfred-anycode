@@ -38,11 +38,13 @@
 	<key>createdby</key>
 	<string>Wilsonyiyi</string>
 	<key>description</key>
-	<string>Search projects and open them in any IDE.</string>
+	<string>Search projects and open them in any IDE. v1.0.2</string>
 	<key>disabled</key>
 	<false/>
 	<key>name</key>
 	<string>AnyCode</string>
+	<key>version</key>
+	<string>1.0.2</string>
 	<key>objects</key>
 	<array>
 		<dict>

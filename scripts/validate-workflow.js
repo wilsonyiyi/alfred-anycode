@@ -86,6 +86,13 @@ if (
 }
 
 const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+if (
+  workflow.version !== packageJson.version
+  || !workflow.description?.includes(`v${packageJson.version}`)
+) {
+  throw new Error('Workflow version and description must match package.json.');
+}
+
 if (packageJson.license !== 'GPL-3.0-or-later') {
   throw new Error('package.json must preserve the GPL-3.0-or-later license.');
 }
