@@ -19,6 +19,7 @@ test('release workflow runs semantic-release automatically on main through OIDC'
   assert.match(releaseConfig, /@semantic-release\/commit-analyzer/u);
   assert.match(releaseConfig, /node scripts\/bump-version\.js \$\{nextRelease\.version\}/u);
   assert.match(releaseConfig, /npm run build:release/u);
-  assert.match(releaseConfig, /pkgRoot: '\.release\/package'/u);
+  assert.match(releaseConfig, /npm publish \.release\/package --access public/u);
+  assert.doesNotMatch(releaseConfig, /@semantic-release\/npm/u);
   assert.match(releaseConfig, /@semantic-release\/git/u);
 });

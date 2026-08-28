@@ -8,12 +8,7 @@ export default {
       '@semantic-release/exec',
       {
         prepareCmd: 'node scripts/bump-version.js ${nextRelease.version} && npm run build:release',
-      },
-    ],
-    [
-      '@semantic-release/npm',
-      {
-        pkgRoot: '.release/package',
+        publishCmd: 'npm publish .release/package --access public',
       },
     ],
     [
