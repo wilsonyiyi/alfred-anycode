@@ -47,6 +47,7 @@
     "url": "git+https://github.com/wilsonyiyi/alfred-anycode.git"
   },
   "license": "GPL-3.0-or-later",
+  "preferGlobal": true,
   "engines": {
     "node": ">=20"
   },

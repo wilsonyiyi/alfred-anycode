@@ -356,7 +356,11 @@ export function renderConfigPage({token}) {
       pointer-events: none;
     }
     .editor-icon-upload:hover .editor-icon-edit,
-    .editor-icon-upload:focus-visible .editor-icon-edit { opacity: 1; }
+    .editor-icon-upload:focus-visible .editor-icon-edit,
+    .editor-icon-upload.is-dragging .editor-icon-edit { opacity: 1; }
+    .editor-icon-upload.is-dragging {
+      box-shadow: 0 0 0 3px var(--focus);
+    }
     .editor-meta { min-width: 0; }
     .editor-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; font-weight: 700; }
     .editor-state { margin-top: 1px; color: var(--muted); font-size: 10px; }
@@ -876,12 +880,21 @@ export function renderConfigPage({token}) {
       container.append(createIcon(EDITOR_ICON_NAMES[editor.type], 23));
     }
 
-    function readEditorIcon(fileInput, editor) {
-      const selectedFile = fileInput.files[0];
+    function isSupportedIconFile(file) {
+      return ['image/gif', 'image/jpeg', 'image/png', 'image/webp', 'image/x-icns'].includes(file.type)
+        || /\.(gif|icns|jpe?g|png|webp)$/iu.test(file.name);
+    }
+
+    function readEditorIconFile(selectedFile, editor, fileInput) {
       if (!selectedFile) return;
+      if (!isSupportedIconFile(selectedFile)) {
+        setStatus('iconUnsupported', true);
+        if (fileInput) fileInput.value = '';
+        return;
+      }
       if (selectedFile.size > 4 * 1024 * 1024) {
         setStatus('iconTooLarge', true);
-        fileInput.value = '';
+        if (fileInput) fileInput.value = '';
         return;
       }
       const reader = new FileReader();
@@ -891,6 +904,10 @@ export function renderConfigPage({token}) {
         render();
       };
       reader.readAsDataURL(selectedFile);
+    }
+
+    function readEditorIcon(fileInput, editor) {
+      readEditorIconFile(fileInput.files[0], editor, fileInput);
     }
 
     function displayProjectPattern(pattern) {
@@ -1062,6 +1079,23 @@ export function renderConfigPage({token}) {
         iconFile.setAttribute('aria-hidden', 'true');
         iconFile.addEventListener('change', () => readEditorIcon(iconFile, editor));
         iconUpload.addEventListener('click', () => iconFile.click());
+        iconUpload.addEventListener('dragenter', event => {
+          event.preventDefault();
+          iconUpload.classList.add('is-dragging');
+        });
+        iconUpload.addEventListener('dragover', event => {
+          event.preventDefault();
+          event.dataTransfer.dropEffect = 'copy';
+          iconUpload.classList.add('is-dragging');
+        });
+        iconUpload.addEventListener('dragleave', event => {
+          if (!iconUpload.contains(event.relatedTarget)) iconUpload.classList.remove('is-dragging');
+        });
+        iconUpload.addEventListener('drop', event => {
+          event.preventDefault();
+          iconUpload.classList.remove('is-dragging');
+          readEditorIconFile(event.dataTransfer.files[0], editor);
+        });
         iconControl.append(iconUpload, iconFile);
         const meta = document.createElement('div');
         meta.className = 'editor-meta';
@@ -1193,6 +1227,10 @@ export function renderConfigPage({token}) {
         if (selection.canceled) return;
         addEditor({
           applicationName: selection.applicationName,
+          iconPreview: selection.iconDataUrl || '',
+          iconUpload: selection.iconDataUrl
+            ? {dataUrl: selection.iconDataUrl, name: selection.applicationName + '.png'}
+            : undefined,
           keywordExpression: uniqueKeyword(selection.applicationName),
           type: 'custom',
         });

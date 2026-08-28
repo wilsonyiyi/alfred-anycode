@@ -25,6 +25,8 @@ test('configuration page is bilingual, uses workflow branding, and ships valid J
   assert.match(page, /className = 'keyword-control'/u);
   assert.match(page, /className = 'editor-action danger'/u);
   assert.match(page, /className = 'keyword-example'/u);
+  assert.match(page, /addEventListener\('drop'/u);
+  assert.match(page, /selection\.iconDataUrl/u);
   assert.doesNotMatch(page, /className = 'usage-help'/u);
   assert.doesNotMatch(page, /row-menu/u);
   assert.match(page, /\/api\/choose-directory/u);
@@ -36,6 +38,7 @@ test('configuration page is bilingual, uses workflow branding, and ships valid J
   assert.match(page, /class="button primary" id="save" type="button" disabled/u);
   assert.equal(TRANSLATIONS.en.save, 'Save changes');
   assert.equal(TRANSLATIONS.zh.save, '保存更改');
+  assert.equal(TRANSLATIONS.zh.iconUnsupported, '请使用 PNG、JPEG、WebP、GIF 或 ICNS 图片。');
   assert.ok(script);
   assert.doesNotThrow(() => new vm.Script(script));
 });
@@ -60,6 +63,7 @@ test('configuration server saves dynamic editors, icon images, and Alfred keywor
     chooseApplication: async () => ({
       applicationName: 'Nova',
       applicationPath: '/Applications/Nova.app',
+      iconDataUrl: 'data:image/png;base64,aWNvbg==',
     }),
     chooseDirectory: async () => '/Users/example/Work',
     dataDirectory,
@@ -110,6 +114,7 @@ test('configuration server saves dynamic editors, icon images, and Alfred keywor
     applicationName: 'Nova',
     applicationPath: '/Applications/Nova.app',
     canceled: false,
+    iconDataUrl: 'data:image/png;base64,aWNvbg==',
   });
 
   const response = await fetch(new URL(`/api/config?token=${session.token}`, base), {

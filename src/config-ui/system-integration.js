@@ -7,6 +7,15 @@ import {EDITOR_TYPES} from '../config/editor-config.js';
 
 const execFileAsync = promisify(execFile);
 const PROJECT_DIRECTORY_NAMES = Object.freeze(['Developer', 'Projects', 'Code', 'Workspace']);
+const APPLICATION_ICON_SCRIPT = String.raw`
+ObjC.import('AppKit');
+function run(argv) {
+  const image = $.NSWorkspace.sharedWorkspace.iconForFile($(argv[0]));
+  const bitmap = $.NSBitmapImageRep.imageRepWithData(image.TIFFRepresentation);
+  const png = bitmap.representationUsingTypeProperties($.NSBitmapImageFileTypePNG, $({}));
+  if (!png.writeToFileAtomically($(argv[1]), true)) throw new Error('Unable to write application icon.');
+}
+`;
 
 async function pathExists(target, fileSystem = fs) {
   try {
@@ -95,16 +104,57 @@ export async function chooseMacOSDirectory({runner = execFileAsync} = {}) {
   }
 }
 
-export async function chooseMacOSApplication({runner = execFileAsync} = {}) {
+export async function readMacOSApplicationIcon(applicationPath, {
+  fileSystem = fs,
+  runner = execFileAsync,
+  temporaryRoot = os.tmpdir(),
+} = {}) {
+  const temporaryDirectory = await fileSystem.mkdtemp(path.join(temporaryRoot, 'anycode-app-icon-'));
+  const sourcePath = path.join(temporaryDirectory, 'application-icon.png');
+  const resizedPath = path.join(temporaryDirectory, 'application-icon-128.png');
+  try {
+    await runner('/usr/bin/osascript', [
+      '-l',
+      'JavaScript',
+      '-e',
+      APPLICATION_ICON_SCRIPT,
+      applicationPath,
+      sourcePath,
+    ], {encoding: 'utf8'});
+    await runner('/usr/bin/sips', [
+      '-Z',
+      '128',
+      sourcePath,
+      '--out',
+      resizedPath,
+    ], {encoding: 'utf8'});
+    const bytes = await fileSystem.readFile(resizedPath);
+    return `data:image/png;base64,${bytes.toString('base64')}`;
+  } finally {
+    await fileSystem.rm(temporaryDirectory, {force: true, recursive: true}).catch(() => {});
+  }
+}
+
+export async function chooseMacOSApplication({
+  iconReader = readMacOSApplicationIcon,
+  runner = execFileAsync,
+} = {}) {
   try {
     const {stdout} = await runner('/usr/bin/osascript', [
       '-e',
       'POSIX path of (choose file with prompt "Choose an editor for AnyCode" of type {"com.apple.application-bundle"} default location (path to applications folder))',
     ], {encoding: 'utf8'});
     const applicationPath = normalizeSelection(stdout);
+    let iconDataUrl = '';
+    try {
+      iconDataUrl = await iconReader(applicationPath, {runner});
+    } catch {
+      // The selected application remains usable when macOS cannot render its icon.
+    }
     return {
       applicationName: path.basename(applicationPath).replace(/\.app$/iu, ''),
       applicationPath,
+      iconDataUrl,
     };
   } catch (error) {
     throw selectionError(error, 'Application');

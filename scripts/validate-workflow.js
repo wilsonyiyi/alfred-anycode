@@ -97,6 +97,9 @@ if (
 if (packageJson.license !== 'GPL-3.0-or-later') {
   throw new Error('package.json must preserve the GPL-3.0-or-later license.');
 }
+if (packageJson.preferGlobal !== true) {
+  throw new Error('package.json must prefer global installation for the npm package page.');
+}
 
 if (packageJson.dependencies?.alfy) {
   throw new Error('The workflow must not reintroduce the vulnerable Alfy dependency tree.');

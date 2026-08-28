@@ -5,6 +5,7 @@ import {
   chooseMacOSDirectory,
   detectLocalEnvironment,
   projectPatternForDirectory,
+  readMacOSApplicationIcon,
 } from '../src/config-ui/system-integration.js';
 
 test('detectLocalEnvironment combines known paths with Spotlight application results', async () => {
@@ -64,6 +65,7 @@ test('macOS selectors normalize directory and application results', async () => 
     },
   });
   const application = await chooseMacOSApplication({
+    iconReader: async () => 'data:image/png;base64,aWNvbg==',
     runner: async () => ({stdout: '/Applications/Zed.app/\n'}),
   });
 
@@ -71,9 +73,42 @@ test('macOS selectors normalize directory and application results', async () => 
   assert.deepEqual(application, {
     applicationName: 'Zed',
     applicationPath: '/Applications/Zed.app',
+    iconDataUrl: 'data:image/png;base64,aWNvbg==',
   });
   assert.equal(calls[0][0], '/usr/bin/osascript');
   assert.equal(projectPatternForDirectory(directory, '/Users/example'), '~/Code/*');
+});
+
+test('readMacOSApplicationIcon renders and resizes the Finder application icon', async () => {
+  const calls = [];
+  const removed = [];
+  const fileSystem = {
+    async mkdtemp(prefix) {
+      assert.equal(prefix, '/tmp/anycode-app-icon-');
+      return '/tmp/anycode-app-icon-test';
+    },
+    async readFile(target) {
+      assert.equal(target, '/tmp/anycode-app-icon-test/application-icon-128.png');
+      return Buffer.from('icon');
+    },
+    async rm(target, options) {
+      removed.push([target, options]);
+    },
+  };
+  const result = await readMacOSApplicationIcon('/Applications/Nova.app', {
+    fileSystem,
+    runner: async (...arguments_) => calls.push(arguments_),
+    temporaryRoot: '/tmp',
+  });
+
+  assert.equal(result, 'data:image/png;base64,aWNvbg==');
+  assert.equal(calls[0][0], '/usr/bin/osascript');
+  assert.equal(calls[0][1].at(-2), '/Applications/Nova.app');
+  assert.equal(calls[1][0], '/usr/bin/sips');
+  assert.deepEqual(removed, [[
+    '/tmp/anycode-app-icon-test',
+    {force: true, recursive: true},
+  ]]);
 });
 
 test('macOS selector cancellation has a stable error code', async () => {

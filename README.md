@@ -8,7 +8,7 @@ Search projects in Alfred and open them with any macOS IDE.
 - Use multiple IDEs at the same time, each with its own Alfred keyword.
 - Start with Visual Studio Code and Cursor; Zed, WebStorm, and Codex remain available as presets.
 - Detect supported editors installed on this Mac, then add, disable, or remove entries dynamically.
-- Click any editor icon to upload, replace, or reset its image.
+- Click an editor icon or drop an image onto it to replace the artwork.
 - Switch the settings interface between English and Chinese.
 - Reveal a project in Finder with <kbd>⌘</kbd> + <kbd>Enter</kbd>.
 - Cache project discovery for fast repeated searches and refresh immediately after configuration changes.
@@ -41,7 +41,7 @@ Type `anycode` in Alfred and press <kbd>Enter</kbd>. This standalone command tak
 
 Use the language control in the upper-right corner to switch the settings interface between English and Chinese. AnyCode remembers the choice locally.
 
-Editor keywords are separate Alfred commands and require a project query. Each enabled editor owns exactly one keyword, with a compact inline example such as `code project-name`. Editors can be temporarily disabled without deleting their configuration, and the remove action is always visible—there is no hidden overflow menu. Click the editor artwork itself to upload a PNG, JPEG, WebP, GIF, or ICNS image and preview it before saving. VS Code, Cursor, Zed, WebStorm, and Codex use their real application artwork by default; custom applications fall back to the installed application icon when available.
+Editor keywords are separate Alfred commands and require a project query. Each enabled editor owns exactly one keyword, with a compact inline example such as `code project-name`. Editors can be temporarily disabled without deleting their configuration, and the remove action is always visible—there is no hidden overflow menu. Click the editor artwork or drop a PNG, JPEG, WebP, GIF, or ICNS image onto it to preview a replacement before saving. VS Code, Cursor, Zed, WebStorm, and Codex use their real application artwork by default; choosing another macOS application imports its Finder icon automatically.
 
 The settings service binds only to `127.0.0.1`, uses a random session token, and closes after inactivity. Empty, invalid, duplicate, and reserved keywords are validated inline. The footer distinguishes saved, unsaved, and invalid states; saving persists configuration in Alfred's workflow data directory and immediately updates the Script Filter keyword expression.
 
