@@ -152,7 +152,6 @@ export function renderConfigPage({token}) {
       font-weight: 650;
       letter-spacing: .02em;
     }
-    .field-hint { display: block; margin-top: 5px; color: var(--muted); font-size: 11px; }
     input, select, textarea {
       width: 100%;
       border: 1px solid transparent;
@@ -211,25 +210,40 @@ export function renderConfigPage({token}) {
       transition: color .16s ease, background .16s ease;
     }
     .icon-button:hover { color: var(--danger); background: var(--danger-soft); }
-    .editor-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
-    .editor-card {
-      min-width: 0;
-      min-height: 226px;
-      display: flex;
-      flex-direction: column;
-      padding: 16px;
-      background: var(--surface-subtle);
+    .editor-table {
+      overflow: hidden;
       border: 1px solid var(--border);
       border-radius: 14px;
     }
-    .editor-top {
+    .editor-table-head,
+    .editor-card {
+      min-width: 0;
+      display: grid;
+      grid-template-columns: minmax(260px, 1fr) minmax(180px, .7fr) 40px;
+      align-items: center;
+      gap: 16px;
+    }
+    .editor-table-head {
+      padding: 9px 14px;
+      color: var(--muted);
+      background: var(--surface-subtle);
+      border-bottom: 1px solid var(--border);
+      font-size: 11px;
+      font-weight: 650;
+      letter-spacing: .02em;
+    }
+    .editor-card {
+      padding: 12px 14px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+    .editor-card:last-child { border-bottom: 0; }
+    .editor-identity {
       display: flex;
       align-items: center;
-      justify-content: space-between;
       gap: 12px;
-      margin-bottom: 16px;
+      min-width: 0;
     }
-    .editor-title { display: flex; align-items: center; gap: 11px; min-width: 0; }
     .editor-icon-control { position: relative; width: 44px; height: 44px; flex: 0 0 auto; }
     .editor-icon-upload {
       width: 44px;
@@ -278,7 +292,7 @@ export function renderConfigPage({token}) {
       place-items: center;
       color: #fff;
       background: var(--accent);
-      border: 2px solid var(--surface-subtle);
+      border: 2px solid var(--surface);
       border-radius: 999px;
       opacity: .72;
       transition: opacity .16s ease;
@@ -301,11 +315,13 @@ export function renderConfigPage({token}) {
       border-radius: 999px;
       box-shadow: var(--shadow);
     }
-    .editor-name { overflow: hidden; font-size: 14px; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
-    .editor-form { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: 12px; }
-    .field-full { grid-column: 1 / -1; }
+    .editor-controls { min-width: 0; flex: 1 1 auto; display: grid; gap: 7px; }
+    .editor-controls select,
+    .editor-controls input,
+    .editor-keyword { min-height: 40px; }
+    .editor-keyword { min-width: 0; }
     .empty {
-      grid-column: 1 / -1;
+      margin: 0;
       padding: 42px 24px;
       text-align: center;
       color: var(--muted);
@@ -360,10 +376,18 @@ export function renderConfigPage({token}) {
       .section-heading { width: 100%; }
       .section-head, .section-body { padding: 14px; }
       .section-head { padding-right: 62px; }
-      .editor-list { grid-template-columns: 1fr; }
-      .editor-card { min-height: 0; }
-      .editor-form { grid-template-columns: 1fr; }
-      .field-full { grid-column: auto; }
+      .editor-table { overflow: visible; border: 0; }
+      .editor-table-head { display: none; }
+      .editor-list { display: grid; gap: 10px; }
+      .editor-card {
+        grid-template-columns: minmax(0, 1fr) 40px;
+        gap: 10px;
+        padding: 12px;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+      }
+      .editor-card:last-child { border-bottom: 1px solid var(--border); }
+      .editor-keyword { grid-column: 1 / -1; grid-row: 2; }
       .brand-mark { width: 42px; height: 42px; }
       .language-button { width: 40px; padding: 0; justify-content: center; }
       .language-button span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
@@ -434,7 +458,16 @@ export function renderConfigPage({token}) {
             <span data-i18n="addEditor">Add editor</span>
           </button>
         </div>
-        <div class="section-body"><div id="editor-list" class="editor-list" aria-live="polite"></div></div>
+        <div class="section-body">
+          <div class="editor-table">
+            <div class="editor-table-head" aria-hidden="true">
+              <span data-i18n="editorType">Editor</span>
+              <span data-i18n="keyword">Keyword</span>
+              <span></span>
+            </div>
+            <div id="editor-list" class="editor-list" aria-live="polite"></div>
+          </div>
+        </div>
       </section>
     </div>
   </main>
@@ -698,16 +731,6 @@ export function renderConfigPage({token}) {
       });
     }
 
-    function field(labelKey, tagName = 'label') {
-      const wrapper = document.createElement(tagName);
-      wrapper.className = 'field';
-      const label = document.createElement('span');
-      label.className = 'field-label';
-      label.textContent = t(labelKey);
-      wrapper.append(label);
-      return wrapper;
-    }
-
     function renderEmptyState() {
       const empty = document.createElement('div');
       empty.className = 'empty';
@@ -735,10 +758,8 @@ export function renderConfigPage({token}) {
         card.className = 'editor-card';
         card.dataset.editorId = editor.id;
 
-        const top = document.createElement('div');
-        top.className = 'editor-top';
-        const title = document.createElement('div');
-        title.className = 'editor-title';
+        const identity = document.createElement('div');
+        identity.className = 'editor-identity';
         const iconControl = document.createElement('div');
         iconControl.className = 'editor-icon-control';
         const iconUpload = document.createElement('button');
@@ -776,10 +797,49 @@ export function renderConfigPage({token}) {
           });
           iconControl.append(resetIcon);
         }
-        const name = document.createElement('div');
-        name.className = 'editor-name';
-        name.textContent = editorLabel(editor);
-        title.append(iconControl, name);
+        const controls = document.createElement('div');
+        controls.className = 'editor-controls';
+        const select = document.createElement('select');
+        select.setAttribute('aria-label', t('editorType'));
+        typeOptions(editor.type).forEach(option => select.append(option));
+        select.addEventListener('change', () => {
+          const previousType = editor.type;
+          editor.type = select.value;
+          const preset = state.types[editor.type];
+          if (editor.type !== 'custom') editor.applicationName = preset.applicationName;
+          else if (previousType !== 'custom') editor.applicationName = '';
+          render();
+        });
+        controls.append(select);
+
+        if (editor.type === 'custom') {
+          const app = document.createElement('input');
+          app.value = editor.applicationName;
+          app.placeholder = t('applicationPlaceholder');
+          app.autocomplete = 'off';
+          app.setAttribute('aria-label', t('applicationName'));
+          app.addEventListener('input', () => {
+            editor.applicationName = app.value;
+            remove.setAttribute('aria-label', t('removeEditor', {name: editorLabel(editor)}));
+            remove.setAttribute('title', t('removeEditor', {name: editorLabel(editor)}));
+            updateDirtyState();
+          });
+          controls.append(app);
+        }
+        identity.append(iconControl, controls);
+
+        const keyword = document.createElement('input');
+        keyword.className = 'editor-keyword';
+        keyword.value = editor.keywordExpression;
+        keyword.placeholder = t('keywordPlaceholder');
+        keyword.autocomplete = 'off';
+        keyword.maxLength = 32;
+        keyword.spellcheck = false;
+        keyword.setAttribute('aria-label', t('keyword'));
+        keyword.addEventListener('input', () => {
+          editor.keywordExpression = keyword.value;
+          updateDirtyState();
+        });
 
         const remove = document.createElement('button');
         remove.type = 'button';
@@ -792,59 +852,7 @@ export function renderConfigPage({token}) {
           render();
           document.querySelector('#add-editor').focus();
         });
-        top.append(title, remove);
-
-        const form = document.createElement('div');
-        form.className = 'editor-form';
-        const typeField = field('editorType');
-        const select = document.createElement('select');
-        select.setAttribute('aria-label', t('editorType'));
-        typeOptions(editor.type).forEach(option => select.append(option));
-        select.addEventListener('change', () => {
-          const previousType = editor.type;
-          editor.type = select.value;
-          const preset = state.types[editor.type];
-          if (editor.type !== 'custom') editor.applicationName = preset.applicationName;
-          else if (previousType !== 'custom') editor.applicationName = '';
-          render();
-        });
-        typeField.append(select);
-
-        const keywordField = field('keyword');
-        const keyword = document.createElement('input');
-        keyword.value = editor.keywordExpression;
-        keyword.placeholder = t('keywordPlaceholder');
-        keyword.autocomplete = 'off';
-        keyword.spellcheck = false;
-        keyword.addEventListener('input', () => {
-          editor.keywordExpression = keyword.value;
-          updateDirtyState();
-        });
-        const keywordHint = document.createElement('span');
-        keywordHint.className = 'field-hint';
-        keywordHint.textContent = t('keywordHint');
-        keywordField.append(keyword, keywordHint);
-        form.append(typeField, keywordField);
-
-        if (editor.type === 'custom') {
-          const appField = field('applicationName');
-          appField.classList.add('field-full');
-          const app = document.createElement('input');
-          app.value = editor.applicationName;
-          app.placeholder = t('applicationPlaceholder');
-          app.autocomplete = 'off';
-          app.addEventListener('input', () => {
-            editor.applicationName = app.value;
-            name.textContent = editorLabel(editor);
-            remove.setAttribute('aria-label', t('removeEditor', {name: editorLabel(editor)}));
-            remove.setAttribute('title', t('removeEditor', {name: editorLabel(editor)}));
-            updateDirtyState();
-          });
-          appField.append(app);
-          form.append(appField);
-        }
-
-        card.append(top, form);
+        card.append(identity, keyword, remove);
         list.append(card);
       });
       updateDirtyState();
@@ -899,6 +907,7 @@ export function renderConfigPage({token}) {
           body: JSON.stringify({
             editors: state.editors.map(editorPayload),
             projectPatterns: document.querySelector('#project-patterns').value.split(/[\\n,;]/),
+            version: state.config.version,
           }),
         });
         setFormFromConfig(body.config, {remember: true});

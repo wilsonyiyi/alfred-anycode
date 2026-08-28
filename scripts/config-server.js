@@ -17,3 +17,7 @@ if (result.error || result.status !== 0) {
   session.server.close();
   throw result.error || new Error(result.stderr || 'Unable to open AnyCode settings.');
 }
+
+if (process.send) {
+  process.send({type: 'anycode:config-ready'}, () => process.disconnect());
+}

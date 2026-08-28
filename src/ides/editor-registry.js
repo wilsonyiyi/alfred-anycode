@@ -17,23 +17,15 @@ export function validateApplicationName(applicationName) {
   return value;
 }
 
-export function parseEditorKeywords(value) {
-  const keywords = String(value ?? '')
-    .split('||')
-    .map(normalizeKeyword)
-    .filter(Boolean);
-
-  if (keywords.length === 0) {
-    throw new Error('Each IDE requires at least one keyword.');
+export function parseEditorKeyword(value) {
+  const keyword = normalizeKeyword(value);
+  if (!keyword) {
+    throw new Error('Each IDE requires one keyword.');
   }
-
-  for (const keyword of keywords) {
-    if (!KEYWORD_PATTERN.test(keyword)) {
-      throw new Error(`Invalid IDE keyword "${keyword}".`);
-    }
+  if (!KEYWORD_PATTERN.test(keyword)) {
+    throw new Error(`Invalid IDE keyword "${keyword}".`);
   }
-
-  return [...new Set(keywords)];
+  return keyword;
 }
 
 function normalizeEditor(editor) {
@@ -42,7 +34,7 @@ function normalizeEditor(editor) {
     applicationName,
     iconPath: String(editor.iconPath ?? '').trim(),
     id: String(editor.id),
-    keywords: parseEditorKeywords(editor.keywordExpression),
+    keyword: parseEditorKeyword(editor.keywordExpression),
     label: applicationName,
   };
 }
@@ -57,12 +49,10 @@ export function createEditorRegistry(editorDefinitions, {allowEmpty = false} = {
   const editorByKeyword = new Map();
 
   for (const editor of editors) {
-    for (const keyword of editor.keywords) {
-      if (editorByKeyword.has(keyword)) {
-        throw new Error(`Duplicate IDE keyword "${keyword}".`);
-      }
-      editorByKeyword.set(keyword, editor);
+    if (editorByKeyword.has(editor.keyword)) {
+      throw new Error(`Duplicate IDE keyword "${editor.keyword}".`);
     }
+    editorByKeyword.set(editor.keyword, editor);
   }
 
   return {

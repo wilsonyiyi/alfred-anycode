@@ -1,7 +1,7 @@
 import crypto from 'node:crypto';
-import {createEditorRegistry, parseEditorKeywords} from '../ides/editor-registry.js';
+import {createEditorRegistry, parseEditorKeyword} from '../ides/editor-registry.js';
 
-export const CONFIG_VERSION = 1;
+export const CONFIG_VERSION = 2;
 export const MANAGER_KEYWORD = 'anycode';
 export const DEFAULT_PROJECT_PATTERNS = Object.freeze([
   '~/Developer/*',
@@ -36,18 +36,24 @@ export function parseProjectPatterns(value) {
   return patterns.length > 0 ? patterns : [...DEFAULT_PROJECT_PATTERNS];
 }
 
-function normalizeEditor(editor) {
+function firstKeyword(value) {
+  return String(value ?? '').split('||', 1)[0].trim();
+}
+
+function normalizeEditor(editor, {migrateAliases = false} = {}) {
   const type = Object.hasOwn(EDITOR_TYPES, editor.type) ? editor.type : 'custom';
   const preset = EDITOR_TYPES[type];
   const applicationName = type === 'custom'
     ? String(editor.applicationName ?? '').trim()
     : preset.applicationName;
-  const keywordExpression = String(editor.keywordExpression ?? '').trim();
+  const keywordExpression = migrateAliases
+    ? firstKeyword(editor.keywordExpression)
+    : String(editor.keywordExpression ?? '').trim();
 
   if (!applicationName) {
     throw new Error('Custom editor application name is required.');
   }
-  parseEditorKeywords(keywordExpression);
+  parseEditorKeyword(keywordExpression);
 
   return {
     applicationName,
@@ -59,8 +65,9 @@ function normalizeEditor(editor) {
 }
 
 export function normalizeEditorConfig(value) {
+  const migrateAliases = Number(value?.version ?? CONFIG_VERSION) < CONFIG_VERSION;
   const editors = Array.isArray(value?.editors)
-    ? value.editors.map(normalizeEditor)
+    ? value.editors.map(editor => normalizeEditor(editor, {migrateAliases}))
     : [];
   const ids = new Set();
   for (const editor of editors) {
@@ -72,10 +79,8 @@ export function normalizeEditorConfig(value) {
 
   const registry = createEditorRegistry(editors, {allowEmpty: true});
   for (const editor of registry.editors) {
-    for (const keyword of editor.keywords) {
-      if (keyword === MANAGER_KEYWORD) {
-        throw new Error(`The keyword "${MANAGER_KEYWORD}" is reserved for configuration.`);
-      }
+    if (editor.keyword === MANAGER_KEYWORD) {
+      throw new Error(`The keyword "${MANAGER_KEYWORD}" is reserved for configuration.`);
     }
   }
 
@@ -98,18 +103,18 @@ export function createDefaultEditorConfig(environment = process.env) {
         applicationName: preset.applicationName,
         iconPath: '',
         id: type,
-        keywordExpression: readConfigString(
+        keywordExpression: firstKeyword(readConfigString(
           environment,
           `${type}_keyword`,
           preset.defaultKeyword,
-        ),
+        )),
         type,
       };
     })
     .filter(editor => editor.keywordExpression);
 
   const customApplication = readConfigString(environment, 'custom_editor_application');
-  const customKeyword = readConfigString(environment, 'custom_editor_keyword');
+  const customKeyword = firstKeyword(readConfigString(environment, 'custom_editor_keyword'));
   if (customApplication && customKeyword) {
     editors.push({
       applicationName: customApplication,

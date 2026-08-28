@@ -11,7 +11,7 @@ import {
 
 const config = {
   editors: [
-    {keywordExpression: 'c||cursor'},
+    {keywordExpression: 'cursor'},
     {keywordExpression: 'code'},
     {keywordExpression: ''},
   ],
@@ -24,8 +24,8 @@ function scriptFilter({keyword, uid}) {
 </dict>`;
 }
 
-test('collectEditorKeywords keeps all enabled aliases separate from the manager keyword', () => {
-  assert.deepEqual(collectEditorKeywords(config), ['c', 'cursor', 'code']);
+test('collectEditorKeywords keeps each editor keyword separate from the manager keyword', () => {
+  assert.deepEqual(collectEditorKeywords(config), ['cursor', 'code']);
 });
 
 test('syncWorkflowKeywords updates only the editor Script Filter keyword field', async t => {
@@ -41,9 +41,9 @@ test('syncWorkflowKeywords updates only the editor Script Filter keyword field',
 
   const result = await syncWorkflowKeywords({config, plistPath});
   const plist = await fs.readFile(plistPath, 'utf8');
-  assert.deepEqual(result, {changed: true, expression: 'c||cursor||code'});
+  assert.deepEqual(result, {changed: true, expression: 'cursor||code'});
   assert.match(plist, /<key>keyword<\/key><string>anycode<\/string>/u);
-  assert.match(plist, /<key>keyword<\/key><string>c\|\|cursor\|\|code<\/string>/u);
+  assert.match(plist, /<key>keyword<\/key><string>cursor\|\|code<\/string>/u);
 });
 
 test('syncWorkflowKeywords remains atomic across concurrent settings pages', async t => {
@@ -59,6 +59,6 @@ test('syncWorkflowKeywords remains atomic across concurrent settings pages', asy
 
   assert.match(
     await fs.readFile(plistPath, 'utf8'),
-    /<string>c\|\|cursor\|\|code<\/string>/u,
+    /<string>cursor\|\|code<\/string>/u,
   );
 });

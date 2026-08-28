@@ -1,7 +1,7 @@
 import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
 import {MANAGER_KEYWORD} from './editor-config.js';
-import {parseEditorKeywords} from '../ides/editor-registry.js';
+import {parseEditorKeyword} from '../ides/editor-registry.js';
 
 export const EDITOR_SCRIPT_FILTER_UID = '46CF5385-7B12-47EC-A34B-D36168267B0A';
 const EDITOR_KEYWORD_FIELD_PATTERN = new RegExp(
@@ -16,13 +16,12 @@ export function collectEditorKeywords(config) {
     if (!String(editor.keywordExpression ?? '').trim()) {
       continue;
     }
-    for (const keyword of parseEditorKeywords(editor.keywordExpression)) {
-      if (seen.has(keyword)) {
-        throw new Error(`Duplicate or reserved workflow keyword "${keyword}".`);
-      }
-      seen.add(keyword);
-      keywords.push(keyword);
+    const keyword = parseEditorKeyword(editor.keywordExpression);
+    if (seen.has(keyword)) {
+      throw new Error(`Duplicate or reserved workflow keyword "${keyword}".`);
     }
+    seen.add(keyword);
+    keywords.push(keyword);
   }
   return keywords;
 }

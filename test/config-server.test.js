@@ -9,7 +9,7 @@ import {renderConfigPage} from '../src/config-ui/page.js';
 import {TRANSLATIONS} from '../src/config-ui/translations.js';
 import {EDITOR_SCRIPT_FILTER_UID} from '../src/config/keyword-sync.js';
 
-test('configuration page is bilingual, uses a two-column card grid, and ships valid JavaScript', () => {
+test('configuration page is bilingual, uses a compact editor list, and ships valid JavaScript', () => {
   const page = renderConfigPage({token: 'test-token'});
   const script = /<script>([\s\S]+)<\/script>/u.exec(page)?.[1];
 
@@ -18,7 +18,9 @@ test('configuration page is bilingual, uses a two-column card grid, and ships va
   assert.match(page, /Add editor/u);
   assert.match(page, /添加编辑器/u);
   assert.match(page, /id="language"/u);
-  assert.match(page, /grid-template-columns: repeat\(2/u);
+  assert.match(page, /class="editor-table-head"/u);
+  assert.match(page, /className = 'editor-keyword'/u);
+  assert.doesNotMatch(page, /Use \|\| to add aliases/u);
   assert.match(page, /<svg/u);
   assert.match(page, /document\.cookie = 'anycode\.locale='/u);
   assert.match(page, /function updateDirtyState\(\)/u);

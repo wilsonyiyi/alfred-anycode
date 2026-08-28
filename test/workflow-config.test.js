@@ -44,7 +44,7 @@ test('default configuration migrates Alfred variables without losing user choice
     applicationName: 'Nova',
     iconPath: '/tmp/nova.png',
     id: 'custom-migrated',
-    keywordExpression: 'nova||nv',
+    keywordExpression: 'nova',
     type: 'custom',
   });
 });
@@ -66,6 +66,20 @@ test('normalizeEditorConfig supports multiple dynamic custom editors', () => {
   assert.throws(
     () => normalizeEditorConfig({editors: [{applicationName: 'Nova', keywordExpression: 'anycode', type: 'custom'}]}),
     /reserved for configuration/,
+  );
+});
+
+test('normalizeEditorConfig migrates legacy aliases to the first keyword', () => {
+  const config = normalizeEditorConfig({
+    editors: [{applicationName: 'Visual Studio Code', keywordExpression: 'code||vsc', type: 'vscode'}],
+    version: 1,
+  });
+
+  assert.equal(config.version, 2);
+  assert.equal(config.editors[0].keywordExpression, 'code');
+  assert.throws(
+    () => normalizeEditorConfig({...config, editors: [{...config.editors[0], keywordExpression: 'code||vsc'}]}),
+    /Invalid IDE keyword/,
   );
 });
 

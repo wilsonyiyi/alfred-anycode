@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
   createEditorRegistry,
-  parseEditorKeywords,
+  parseEditorKeyword,
 } from '../src/ides/editor-registry.js';
 
 function definition(overrides = {}) {
@@ -15,8 +15,9 @@ function definition(overrides = {}) {
   };
 }
 
-test('parseEditorKeywords supports multiple Alfred keyword aliases', () => {
-  assert.deepEqual(parseEditorKeywords('code || VSC || code'), ['code', 'vsc']);
+test('parseEditorKeyword normalizes one Alfred keyword and rejects aliases', () => {
+  assert.equal(parseEditorKeyword(' VSC '), 'vsc');
+  assert.throws(() => parseEditorKeyword('code||vsc'), /Invalid IDE keyword/);
 });
 
 test('createEditorRegistry resolves each IDE independently by used keyword', () => {
@@ -25,12 +26,12 @@ test('createEditorRegistry resolves each IDE independently by used keyword', () 
     definition({
       applicationName: 'Cursor',
       id: 'editor-2',
-      keywordExpression: 'cursor||cur',
+      keywordExpression: 'cursor',
     }),
   ]);
 
   assert.equal(registry.resolve('code').applicationName, 'Visual Studio Code');
-  assert.equal(registry.resolve('CUR').applicationName, 'Cursor');
+  assert.equal(registry.resolve('CURSOR').applicationName, 'Cursor');
 });
 
 test('createEditorRegistry rejects ambiguous duplicate keywords', () => {

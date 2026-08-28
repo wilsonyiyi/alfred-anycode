@@ -37,17 +37,11 @@ The workflow ships its own Alfred JSON/cache runtime, Node locator, and conserva
 Type `anycode` in Alfred and press <kbd>Enter</kbd>. This standalone command takes no argument and opens a local settings interface with two separate modules:
 
 - **Project discovery** manages the shared project directory patterns.
-- **Editors** presents a compact two-column card grid. New installations contain Visual Studio Code and Cursor; add or remove entries, choose another preset or a custom application, and assign every entry its own keyword.
+- **Editors** presents a compact editor-and-keyword list. New installations contain Visual Studio Code and Cursor; add or remove entries, choose another preset or a custom application, and assign every entry one keyword.
 
 Use the language control in the upper-right corner to switch the settings interface between English and Chinese. AnyCode remembers the choice locally.
 
 Editor keywords are separate Alfred commands and require a project query. All non-empty editor keywords work simultaneously. Click any editor card icon to upload a PNG, JPEG, WebP, GIF, or ICNS image and preview it before saving. VS Code, Cursor, Zed, WebStorm, and Codex use their real application artwork by default; custom applications fall back to the installed application icon when available.
-
-One IDE can have more than one keyword by separating aliases with `||`:
-
-```text
-code||vsc
-```
 
 The settings service binds only to `127.0.0.1`, uses a random session token, and closes after inactivity. Saving validates duplicate or reserved keywords, persists configuration in Alfred's workflow data directory, and immediately updates the Script Filter keyword expression.
 
