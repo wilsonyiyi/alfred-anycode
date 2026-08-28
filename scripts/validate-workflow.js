@@ -19,6 +19,7 @@ const requiredFiles = [
   'info.plist',
   'scripts/config-server.js',
   'scripts/assert-publishable.js',
+  'scripts/bump-version.js',
   'scripts/build-release.js',
   'scripts/run-action.js',
   'scripts/run-node.sh',
@@ -35,6 +36,7 @@ const requiredFiles = [
   'src/ides/editor-registry.js',
   'src/install/workflow-link.js',
   'src/release/release-package.js',
+  'src/release/version.js',
 ];
 
 for (const file of requiredFiles) {

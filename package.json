@@ -10,10 +10,11 @@
     "postinstall": "node scripts/install-workflow.js",
     "prepack": "node scripts/assert-publishable.js",
     "prepublishOnly": "npm run check && node scripts/assert-publishable.js",
-    "publish:release": "npm run build:release && npm publish .release/package --access public --registry=https://registry.npmjs.org",
     "preuninstall": "node scripts/uninstall-workflow.js",
+    "release": "semantic-release",
     "test": "node --test",
-    "validate": "node scripts/validate-workflow.js"
+    "validate": "node scripts/validate-workflow.js",
+    "version:bump": "node scripts/bump-version.js"
   },
   "author": {
     "name": "Wilson",
@@ -63,5 +64,10 @@
   ],
   "dependencies": {
     "fast-glob": "^3.3.3"
+  },
+  "devDependencies": {
+    "@semantic-release/exec": "^7.1.0",
+    "@semantic-release/git": "^11.0.1",
+    "semantic-release": "^25.0.9"
   }
 }

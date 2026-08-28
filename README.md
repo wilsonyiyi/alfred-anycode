@@ -81,19 +81,33 @@ Run the full verification suite with:
 npm run check
 ```
 
-Create an isolated, publishable package with the production Bundle ID:
+Create an isolated, publishable package with the production Bundle ID locally:
 
 ```sh
 npm run build:release
 ```
 
-The generated package is written to `.release/package`. Its workflow uses `com.wilsonyiyi.alfred-anycode`, is enabled, and starts with the default `code` and `cursor` keywords. Source workflow preferences are never copied into the release metadata. Publish only this generated directory:
+The generated package is written to `.release/package`. Its workflow uses `com.wilsonyiyi.alfred-anycode`, is enabled, and starts with the default `code` and `cursor` keywords. Source workflow preferences are never copied into the release metadata.
 
-```sh
-npm run publish:release
-```
+Production releases run automatically after a branch is merged or pushed to `main`. The **CI & Release** workflow uses `semantic-release` and Conventional Commit messages to decide whether a release is needed:
 
-Publishing or packing the development source directly is rejected to prevent a `.dev` Bundle ID from reaching npm.
+- `fix:` releases a patch version;
+- `feat:` releases a minor version;
+- `BREAKING CHANGE:` or `!` releases a major version;
+- documentation, test, build, and maintenance-only commits do not publish a version by default.
+
+When using squash merge, keep the pull request title in Conventional Commit format because it becomes the commit analyzed on `main`.
+
+When a release is required, CI updates `package.json`, `package-lock.json`, and Alfred's native workflow version, builds the production package, commits the generated version metadata, creates a matching `vX.Y.Z` tag and GitHub Release, and publishes to npm through Trusted Publishing (OIDC). No version choice or manual workflow dispatch is required.
+
+Configure `alfred-anycode` on npm with this Trusted Publisher before the first automated release:
+
+- Repository: `wilsonyiyi/alfred-anycode`
+- Workflow filename: `release.yml`
+- Allowed action: `npm publish`
+- Environment: leave blank
+
+The repository must allow GitHub Actions read/write workflow permissions and permit the semantic-release bot commit on `main`. No long-lived npm token is required. Publishing or packing the development source directly is rejected to prevent a `.dev` Bundle ID from reaching npm.
 
 ## License and attribution
 
