@@ -13,7 +13,7 @@ export function collectEditorKeywords(config) {
   const keywords = [];
   const seen = new Set([MANAGER_KEYWORD]);
   for (const editor of config.editors) {
-    if (!String(editor.keywordExpression ?? '').trim()) {
+    if (editor.enabled === false || !String(editor.keywordExpression ?? '').trim()) {
       continue;
     }
     const keyword = parseEditorKeyword(editor.keywordExpression);

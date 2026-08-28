@@ -32,6 +32,15 @@ export function createConfigStore({
   return {
     configPath,
     dataDirectory,
+    async exists() {
+      try {
+        await fileSystem.access(configPath);
+        return true;
+      } catch (error) {
+        if (error.code === 'ENOENT') return false;
+        throw error;
+      }
+    },
     async load() {
       try {
         const value = JSON.parse(await fileSystem.readFile(configPath, 'utf8'));

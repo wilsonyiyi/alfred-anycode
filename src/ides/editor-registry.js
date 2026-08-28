@@ -32,6 +32,7 @@ function normalizeEditor(editor) {
   const applicationName = validateApplicationName(editor.applicationName);
   return {
     applicationName,
+    enabled: editor.enabled !== false,
     iconPath: String(editor.iconPath ?? '').trim(),
     id: String(editor.id),
     keyword: parseEditorKeyword(editor.keywordExpression),
@@ -41,7 +42,7 @@ function normalizeEditor(editor) {
 
 export function createEditorRegistry(editorDefinitions, {allowEmpty = false} = {}) {
   const editors = editorDefinitions
-    .filter(editor => String(editor.keywordExpression ?? '').trim())
+    .filter(editor => editor.enabled !== false && String(editor.keywordExpression ?? '').trim())
     .map(normalizeEditor);
   if (!allowEmpty && editors.length === 0) {
     throw new Error('Configure at least one IDE keyword.');

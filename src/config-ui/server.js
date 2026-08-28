@@ -10,6 +10,12 @@ import {createConfigStore} from '../config/config-store.js';
 import {EDITOR_TYPES} from '../config/editor-config.js';
 import {syncWorkflowKeywords} from '../config/keyword-sync.js';
 import {renderConfigPage} from './page.js';
+import {
+  chooseMacOSApplication,
+  chooseMacOSDirectory,
+  detectLocalEnvironment,
+  projectPatternForDirectory,
+} from './system-integration.js';
 
 const BODY_LIMIT_BYTES = 6 * 1024 * 1024;
 const ICON_LIMIT_BYTES = 4 * 1024 * 1024;
@@ -133,6 +139,20 @@ async function serveBuiltInEditorIcon({editorType, response, workflowRoot}) {
   }
 }
 
+async function serveWorkflowIcon({response, workflowRoot}) {
+  try {
+    const bytes = await fs.readFile(path.join(workflowRoot, 'icon.png'));
+    response.writeHead(200, {
+      'cache-control': 'public, max-age=86400',
+      'content-type': 'image/png',
+      'x-content-type-options': 'nosniff',
+    });
+    response.end(bytes);
+  } catch {
+    json(response, 404, {error: 'Workflow icon not found.'});
+  }
+}
+
 function publicConfig(config, token) {
   return {
     ...config,
@@ -167,7 +187,10 @@ async function serveIcon({config, editorId, response}) {
 }
 
 export async function startConfigServer({
+  chooseApplication = chooseMacOSApplication,
+  chooseDirectory = chooseMacOSDirectory,
   dataDirectory,
+  detectEnvironment = detectLocalEnvironment,
   environment = process.env,
   host = '127.0.0.1',
   reloadWorkflow = reloadAlfredWorkflow,
@@ -176,7 +199,13 @@ export async function startConfigServer({
   const token = crypto.randomBytes(24).toString('hex');
   const store = createConfigStore({dataDirectory, environment});
   let idleTimer;
+  let localEnvironmentPromise;
   let server;
+
+  const getLocalEnvironment = () => {
+    localEnvironmentPromise ||= detectEnvironment({homeDirectory: environment.HOME});
+    return localEnvironmentPromise;
+  };
 
   const syncKeywordsAndReload = async config => {
     const sync = await syncWorkflowKeywords({
@@ -212,12 +241,40 @@ export async function startConfigServer({
       }
 
       if (request.method === 'GET' && requestUrl.pathname === '/api/config') {
+        const isFirstRun = !(await store.exists());
         const config = await store.load();
         await syncKeywordsAndReload(config);
         json(response, 200, {
           config: publicConfig(config, token),
           editorTypes: EDITOR_TYPES,
+          isFirstRun,
+          localEnvironment: await getLocalEnvironment(),
         });
+        return;
+      }
+
+      if (request.method === 'POST' && requestUrl.pathname === '/api/choose-directory') {
+        try {
+          const directory = await chooseDirectory();
+          json(response, 200, {
+            canceled: false,
+            pattern: projectPatternForDirectory(directory, environment.HOME),
+          });
+        } catch (error) {
+          if (error?.code !== 'SELECTION_CANCELED') throw error;
+          json(response, 200, {canceled: true});
+        }
+        return;
+      }
+
+      if (request.method === 'POST' && requestUrl.pathname === '/api/choose-application') {
+        try {
+          const application = await chooseApplication();
+          json(response, 200, {canceled: false, ...application});
+        } catch (error) {
+          if (error?.code !== 'SELECTION_CANCELED') throw error;
+          json(response, 200, {canceled: true});
+        }
         return;
       }
 
@@ -237,6 +294,11 @@ export async function startConfigServer({
           response,
           workflowRoot,
         });
+        return;
+      }
+
+      if (request.method === 'GET' && requestUrl.pathname === '/assets/workflow-icon') {
+        await serveWorkflowIcon({response, workflowRoot});
         return;
       }
 

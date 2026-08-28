@@ -1,7 +1,7 @@
 import crypto from 'node:crypto';
 import {createEditorRegistry, parseEditorKeyword} from '../ides/editor-registry.js';
 
-export const CONFIG_VERSION = 2;
+export const CONFIG_VERSION = 3;
 export const MANAGER_KEYWORD = 'anycode';
 export const DEFAULT_PROJECT_PATTERNS = Object.freeze([
   '~/Developer/*',
@@ -28,12 +28,12 @@ function readConfigString(environment, key, fallback = '') {
   return fallback;
 }
 
-export function parseProjectPatterns(value) {
+export function parseProjectPatterns(value, {fallbackToDefaults = true} = {}) {
   const values = Array.isArray(value)
     ? value
     : String(value ?? '').split(/[;,\n]/u);
   const patterns = [...new Set(values.map(pattern => String(pattern).trim()).filter(Boolean))];
-  return patterns.length > 0 ? patterns : [...DEFAULT_PROJECT_PATTERNS];
+  return patterns.length > 0 || !fallbackToDefaults ? patterns : [...DEFAULT_PROJECT_PATTERNS];
 }
 
 function firstKeyword(value) {
@@ -43,6 +43,7 @@ function firstKeyword(value) {
 function normalizeEditor(editor, {migrateAliases = false} = {}) {
   const type = Object.hasOwn(EDITOR_TYPES, editor.type) ? editor.type : 'custom';
   const preset = EDITOR_TYPES[type];
+  const enabled = editor.enabled !== false;
   const applicationName = type === 'custom'
     ? String(editor.applicationName ?? '').trim()
     : preset.applicationName;
@@ -53,10 +54,11 @@ function normalizeEditor(editor, {migrateAliases = false} = {}) {
   if (!applicationName) {
     throw new Error('Custom editor application name is required.');
   }
-  parseEditorKeyword(keywordExpression);
+  if (enabled) parseEditorKeyword(keywordExpression);
 
   return {
     applicationName,
+    enabled,
     iconPath: String(editor.iconPath ?? '').trim(),
     id: String(editor.id ?? '').trim() || crypto.randomUUID(),
     keywordExpression,
@@ -86,7 +88,9 @@ export function normalizeEditorConfig(value) {
 
   return {
     editors,
-    projectPatterns: parseProjectPatterns(value?.projectPatterns),
+    projectPatterns: parseProjectPatterns(value?.projectPatterns, {
+      fallbackToDefaults: !Array.isArray(value?.projectPatterns),
+    }),
     version: CONFIG_VERSION,
   };
 }
@@ -101,6 +105,7 @@ export function createDefaultEditorConfig(environment = process.env) {
       const preset = EDITOR_TYPES[type];
       return {
         applicationName: preset.applicationName,
+        enabled: true,
         iconPath: '',
         id: type,
         keywordExpression: firstKeyword(readConfigString(
@@ -118,6 +123,7 @@ export function createDefaultEditorConfig(environment = process.env) {
   if (customApplication && customKeyword) {
     editors.push({
       applicationName: customApplication,
+      enabled: true,
       iconPath: readConfigString(environment, 'custom_editor_icon'),
       id: 'custom-migrated',
       keywordExpression: customKeyword,
@@ -134,6 +140,7 @@ export function createDefaultEditorConfig(environment = process.env) {
 export function editorDefinitions(config) {
   return config.editors.map(editor => ({
     applicationName: editor.applicationName,
+    enabled: editor.enabled,
     iconPath: editor.iconPath,
     id: editor.id,
     keywordExpression: editor.keywordExpression,

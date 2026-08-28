@@ -42,6 +42,7 @@ test('default configuration migrates Alfred variables without losing user choice
   assert.equal(config.editors.find(editor => editor.type === 'zed').keywordExpression, 'z');
   assert.deepEqual(config.editors.at(-1), {
     applicationName: 'Nova',
+    enabled: true,
     iconPath: '/tmp/nova.png',
     id: 'custom-migrated',
     keywordExpression: 'nova',
@@ -75,12 +76,25 @@ test('normalizeEditorConfig migrates legacy aliases to the first keyword', () =>
     version: 1,
   });
 
-  assert.equal(config.version, 2);
+  assert.equal(config.version, 3);
   assert.equal(config.editors[0].keywordExpression, 'code');
   assert.throws(
     () => normalizeEditorConfig({...config, editors: [{...config.editors[0], keywordExpression: 'code||vsc'}]}),
     /Invalid IDE keyword/,
   );
+});
+
+test('disabled editors may keep incomplete keywords without joining the active registry', () => {
+  const config = normalizeEditorConfig({
+    editors: [
+      {applicationName: 'Cursor', id: 'cursor', keywordExpression: 'c', type: 'cursor'},
+      {applicationName: 'Nova', enabled: false, id: 'nova', keywordExpression: '', type: 'custom'},
+    ],
+    version: 3,
+  });
+
+  assert.equal(config.editors[1].enabled, false);
+  assert.equal(config.editors[1].keywordExpression, '');
 });
 
 test('configuration store persists JSON and readWorkflowConfig consumes it', async t => {
@@ -102,4 +116,5 @@ test('parseProjectPatterns accepts comma, semicolon, and newline separators', ()
     parseProjectPatterns('~/Code/*, ~/Work/*;~/Lab/*\n~/Code/*'),
     ['~/Code/*', '~/Work/*', '~/Lab/*'],
   );
+  assert.deepEqual(parseProjectPatterns([], {fallbackToDefaults: false}), []);
 });

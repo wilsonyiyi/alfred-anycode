@@ -4,10 +4,10 @@ Search projects in Alfred and open them with any macOS IDE.
 
 ## Features
 
-- Configure project directories with comma-, semicolon-, or newline-separated glob patterns.
+- Add project folders with the native macOS directory picker; advanced users can still edit glob patterns.
 - Use multiple IDEs at the same time, each with its own Alfred keyword.
 - Start with Visual Studio Code and Cursor; Zed, WebStorm, and Codex remain available as presets.
-- Add and remove editor entries dynamically.
+- Detect supported editors installed on this Mac, then add, disable, or remove entries dynamically.
 - Click any editor icon to upload, replace, or reset its image.
 - Switch the settings interface between English and Chinese.
 - Reveal a project in Finder with <kbd>⌘</kbd> + <kbd>Enter</kbd>.
@@ -36,14 +36,14 @@ The workflow ships its own Alfred JSON/cache runtime, Node locator, and conserva
 
 Type `anycode` in Alfred and press <kbd>Enter</kbd>. This standalone command takes no argument and opens a local settings interface with two separate modules:
 
-- **Project discovery** manages the shared project directory patterns.
-- **Editors** presents a compact editor-and-keyword list. New installations contain Visual Studio Code and Cursor; add or remove entries, choose another preset or a custom application, and assign every entry one keyword.
+- **Project directories** lists friendly folder paths and opens the native macOS folder picker. Expand **Advanced rules** only when you need to edit glob patterns directly.
+- **Editors** presents a compact editor-and-keyword list. New installations contain Visual Studio Code and Cursor. **Add editor** lists all supported applications detected through known install locations and Spotlight, marking configured applications as already added; it can also open a native application picker for anything else.
 
 Use the language control in the upper-right corner to switch the settings interface between English and Chinese. AnyCode remembers the choice locally.
 
-Editor keywords are separate Alfred commands and require a project query. All non-empty editor keywords work simultaneously. Click any editor card icon to upload a PNG, JPEG, WebP, GIF, or ICNS image and preview it before saving. VS Code, Cursor, Zed, WebStorm, and Codex use their real application artwork by default; custom applications fall back to the installed application icon when available.
+Editor keywords are separate Alfred commands and require a project query. Each enabled editor owns exactly one keyword, with a compact inline example such as `code project-name`. Editors can be temporarily disabled without deleting their configuration, and the remove action is always visible—there is no hidden overflow menu. Click the editor artwork itself to upload a PNG, JPEG, WebP, GIF, or ICNS image and preview it before saving. VS Code, Cursor, Zed, WebStorm, and Codex use their real application artwork by default; custom applications fall back to the installed application icon when available.
 
-The settings service binds only to `127.0.0.1`, uses a random session token, and closes after inactivity. Saving validates duplicate or reserved keywords, persists configuration in Alfred's workflow data directory, and immediately updates the Script Filter keyword expression.
+The settings service binds only to `127.0.0.1`, uses a random session token, and closes after inactivity. Empty, invalid, duplicate, and reserved keywords are validated inline. The footer distinguishes saved, unsaved, and invalid states; saving persists configuration in Alfred's workflow data directory and immediately updates the Script Filter keyword expression.
 
 ## Usage
 
