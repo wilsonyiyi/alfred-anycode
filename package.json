@@ -1,6 +1,6 @@
 {
   "name": "alfred-anycode",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "Search and open any project in any IDE.",
   "main": "index.js",
   "type": "module",

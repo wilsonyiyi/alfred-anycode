@@ -44,7 +44,7 @@
 	<key>name</key>
 	<string>AnyCode</string>
 	<key>version</key>
-	<string>1.0.2</string>
+	<string>1.1.0</string>
 	<key>objects</key>
 	<array>
 		<dict>
