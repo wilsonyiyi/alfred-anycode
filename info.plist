@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>bundleid</key>
-	<string>com.wilsonyiyi.alfred-anycode</string>
+	<string>com.wilsonyiyi.alfred-anycode.dev</string>
 	<key>category</key>
 	<string>Productivity</string>
 	<key>connections</key>
@@ -38,7 +38,7 @@
 	<key>createdby</key>
 	<string>Wilsonyiyi</string>
 	<key>description</key>
-	<string>Search projects and open them in any IDE. v1.0.2</string>
+	<string>Search and open any project in any IDE.</string>
 	<key>disabled</key>
 	<false/>
 	<key>name</key>

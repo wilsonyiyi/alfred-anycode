@@ -5,9 +5,12 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
+    "build:release": "npm run check && node scripts/build-release.js",
     "check": "npm test && npm run validate",
     "postinstall": "node scripts/install-workflow.js",
-    "prepublishOnly": "npm run check",
+    "prepack": "node scripts/assert-publishable.js",
+    "prepublishOnly": "npm run check && node scripts/assert-publishable.js",
+    "publish:release": "npm run build:release && npm publish .release/package --access public --registry=https://registry.npmjs.org",
     "preuninstall": "node scripts/uninstall-workflow.js",
     "test": "node --test",
     "validate": "node scripts/validate-workflow.js"

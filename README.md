@@ -28,7 +28,7 @@ When the package is published, install or update it with:
 npm install --global alfred-anycode
 ```
 
-For local development, clone the repository into an Alfred workflow folder, run `npm install`, and open the workflow in Alfred Preferences.
+For local development, clone the repository into an Alfred workflow folder, run `npm install`, and open the workflow in Alfred Preferences. The source workflow uses the development-only Bundle ID `com.wilsonyiyi.alfred-anycode.dev`, so it can coexist with the globally installed release.
 
 The workflow ships its own Alfred JSON/cache runtime, Node locator, and conservative npm installer. The installer reads Alfred's active preferences path and creates one package-owned symbolic link; it never replaces an existing workflow directory or a link to another target. Install it as your macOS user, without `sudo`.
 
@@ -80,6 +80,20 @@ Run the full verification suite with:
 ```sh
 npm run check
 ```
+
+Create an isolated, publishable package with the production Bundle ID:
+
+```sh
+npm run build:release
+```
+
+The generated package is written to `.release/package`. Its workflow uses `com.wilsonyiyi.alfred-anycode`, is enabled, and starts with the default `code` and `cursor` keywords. Source workflow preferences are never copied into the release metadata. Publish only this generated directory:
+
+```sh
+npm run publish:release
+```
+
+Publishing or packing the development source directly is rejected to prevent a `.dev` Bundle ID from reaching npm.
 
 ## License and attribution
 

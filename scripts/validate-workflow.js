@@ -18,6 +18,8 @@ const requiredFiles = [
   'index.js',
   'info.plist',
   'scripts/config-server.js',
+  'scripts/assert-publishable.js',
+  'scripts/build-release.js',
   'scripts/run-action.js',
   'scripts/run-node.sh',
   'scripts/install-workflow.js',
@@ -32,6 +34,7 @@ const requiredFiles = [
   'src/ides/editor-icon.js',
   'src/ides/editor-registry.js',
   'src/install/workflow-link.js',
+  'src/release/release-package.js',
 ];
 
 for (const file of requiredFiles) {
@@ -86,11 +89,16 @@ if (
 }
 
 const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+const supportedBundleIds = new Set([
+  'com.wilsonyiyi.alfred-anycode',
+  'com.wilsonyiyi.alfred-anycode.dev',
+]);
 if (
   workflow.version !== packageJson.version
-  || !workflow.description?.includes(`v${packageJson.version}`)
+  || workflow.description !== packageJson.description
+  || !supportedBundleIds.has(workflow.bundleid)
 ) {
-  throw new Error('Workflow version and description must match package.json.');
+  throw new Error('Workflow metadata must match package.json and use a supported bundle ID.');
 }
 
 if (packageJson.license !== 'GPL-3.0-or-later') {
