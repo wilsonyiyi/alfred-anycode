@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "build:release": "npm run check && node scripts/build-release.js",
+    "build:workflow": "node scripts/build-workflow.js",
     "check": "npm test && npm run validate",
     "postinstall": "node scripts/install-workflow.js",
     "prepack": "node scripts/assert-publishable.js",
@@ -56,6 +57,7 @@
     "A230553D-D083-45EE-AAFD-02C49F29CED6.png",
     "assets/editor-icons",
     "icon.png",
+    "images",
     "index.js",
     "info.plist",
     "LICENSE",

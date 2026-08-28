@@ -21,6 +21,7 @@ const requiredFiles = [
   'scripts/assert-publishable.js',
   'scripts/bump-version.js',
   'scripts/build-release.js',
+  'scripts/build-workflow.js',
   'scripts/run-action.js',
   'scripts/run-node.sh',
   'scripts/install-workflow.js',
@@ -36,6 +37,7 @@ const requiredFiles = [
   'src/ides/editor-registry.js',
   'src/install/workflow-link.js',
   'src/release/release-package.js',
+  'src/release/alfred-workflow.js',
   'src/release/version.js',
 ];
 

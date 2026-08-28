@@ -1,61 +1,57 @@
 # Alfred AnyCode
 
-Search projects in Alfred and open them with any macOS IDE.
+Search projects in Alfred and open them with any configured macOS editor.
 
-## Features
+## Setup
 
-- Add project folders with the native macOS directory picker; advanced users can still edit glob patterns.
-- Use multiple IDEs at the same time, each with its own Alfred keyword.
-- Start with Visual Studio Code and Cursor; Zed, WebStorm, and Codex remain available as presets.
-- Detect supported editors installed on this Mac, then add, disable, or remove entries dynamically.
-- Click an editor icon or drop an image onto it to replace the artwork.
-- Switch the settings interface between English and Chinese.
-- Reveal a project in Finder with <kbd>⌘</kbd> + <kbd>Enter</kbd>.
-- Cache project discovery for fast repeated searches and refresh immediately after configuration changes.
-- Search project names and paths with Unicode-aware fuzzy matching.
+Install [Node.js 20 or later](https://nodejs.org/) before using the workflow. Alfred 5.1 or later with the Powerpack is required.
 
-## Requirements
+## Usage
 
-- macOS
-- Alfred 5.1 or later with Powerpack
-- Node.js 20 or later
+Search projects and open the selected result via an editor keyword, such as `code` or `cursor`. Every editor has its own configurable keyword.
+
+- <kbd>↩</kbd> Open the project in the selected editor.
+- <kbd>⌘</kbd><kbd>↩</kbd> Reveal the project in Finder.
+- Append `:refresh` to rebuild the project cache, for example `code :refresh`.
+
+Open AnyCode Settings via the `anycode` keyword to choose project directories, editors, and keywords.
+
+![Configuring project directories and editors in AnyCode Settings](images/settings.png)
+
+## Configuration
+
+AnyCode Settings has two focused sections:
+
+- **Project directories** uses the native macOS directory picker. Expand **Advanced rules** to edit glob patterns directly.
+- **Editors** configures one Alfred keyword per editor. Visual Studio Code and Cursor are included by default; Zed, WebStorm, Codex, and other macOS applications can be added.
+
+Installed editors are detected through known application paths and Spotlight. Editors can be enabled, disabled, or removed without affecting the shared project list. Click an editor icon or drop a PNG, JPEG, WebP, GIF, or ICNS image onto it to replace the artwork. Choosing another macOS application imports its Finder icon automatically.
+
+The settings page is available in English and Chinese and remembers the selected language. Invalid, duplicate, empty, and reserved keywords are reported inline before saving.
 
 ## Installation
 
-When the package is published, install or update it with:
+[Download the latest Alfred workflow](https://github.com/wilsonyiyi/alfred-anycode/releases/latest/download/Alfred-AnyCode.alfredworkflow), then double-click it to install in Alfred.
+
+Alternatively, install or update from npm:
 
 ```sh
 npm install --global alfred-anycode
 ```
 
-For local development, clone the repository into an Alfred workflow folder, run `npm install`, and open the workflow in Alfred Preferences. The source workflow uses the development-only Bundle ID `com.wilsonyiyi.alfred-anycode.dev`, so it can coexist with the globally installed release.
+The npm installer creates one package-owned symbolic link in Alfred’s active preferences directory. It never replaces an existing workflow directory or a link to another target. Run it as your macOS user, without `sudo`.
 
-The workflow ships its own Alfred JSON/cache runtime, Node locator, and conservative npm installer. The installer reads Alfred's active preferences path and creates one package-owned symbolic link; it never replaces an existing workflow directory or a link to another target. Install it as your macOS user, without `sudo`.
+For local development, clone the repository into an Alfred workflow folder, run `npm install`, and open the workflow in Alfred Preferences. The source workflow uses the development-only Bundle ID `com.wilsonyiyi.alfred-anycode.dev`, so it can coexist with an installed release.
 
-## Configuration
+## Features
 
-Type `anycode` in Alfred and press <kbd>Enter</kbd>. This standalone command takes no argument and opens a local settings interface with two separate modules:
-
-- **Project directories** lists friendly folder paths and opens the native macOS folder picker. Expand **Advanced rules** only when you need to edit glob patterns directly.
-- **Editors** presents a compact editor-and-keyword list. New installations contain Visual Studio Code and Cursor. **Add editor** lists all supported applications detected through known install locations and Spotlight, marking configured applications as already added; it can also open a native application picker for anything else.
-
-Use the language control in the upper-right corner to switch the settings interface between English and Chinese. AnyCode remembers the choice locally.
-
-Editor keywords are separate Alfred commands and require a project query. Each enabled editor owns exactly one keyword, with a compact inline example such as `code project-name`. Editors can be temporarily disabled without deleting their configuration, and the remove action is always visible—there is no hidden overflow menu. Click the editor artwork or drop a PNG, JPEG, WebP, GIF, or ICNS image onto it to preview a replacement before saving. VS Code, Cursor, Zed, WebStorm, and Codex use their real application artwork by default; choosing another macOS application imports its Finder icon automatically.
-
-The settings service binds only to `127.0.0.1`, uses a random session token, and closes after inactivity. Empty, invalid, duplicate, and reserved keywords are validated inline. The footer distinguishes saved, unsaved, and invalid states; saving persists configuration in Alfred's workflow data directory and immediately updates the Script Filter keyword expression.
-
-## Usage
-
-Search with different IDEs directly:
-
-```text
-code project-name
-cursor project-name
-zed project-name
-```
-
-Append `:refresh` to any configured IDE keyword to rebuild the shared project cache, for example `code :refresh`.
+- Use multiple editors at the same time with independent Alfred keywords.
+- Add project folders through the native picker or advanced glob rules.
+- Search project names and paths with Unicode-aware fuzzy matching.
+- Cache project discovery for fast repeated searches.
+- Add supported or custom macOS applications dynamically.
+- Use built-in application artwork or custom drag-and-drop icons.
+- Configure the workflow in English or Chinese.
 
 ## Architecture
 
@@ -64,10 +60,11 @@ Append `:refresh` to any configured IDE keyword to rebuild the shared project ca
 - `src/config-ui`: Local settings server and responsive grouped interface.
 - `src/projects`: Project discovery and cache policy.
 - `src/search`: Project ranking and Unicode-aware matching.
-- `src/ides`: Keyword-to-IDE registry and per-IDE icon resolution.
+- `src/ides`: Keyword-to-editor registry and per-editor icon resolution.
 - `src/actions`: Safe macOS project opening and Finder reveal actions.
 - `src/alfred`: Alfred JSON item presentation.
 - `src/install`: Dependency-free, non-destructive npm workflow linking.
+- `src/release`: Production package and installable `.alfredworkflow` generation.
 
 Run the full verification suite with:
 
@@ -75,34 +72,25 @@ Run the full verification suite with:
 npm run check
 ```
 
-Create an isolated, publishable package with the production Bundle ID locally:
+Build and verify the production workflow locally:
 
 ```sh
 npm run build:release
+npm run build:workflow
 ```
 
-The generated package is written to `.release/package`. Its workflow uses `com.wilsonyiyi.alfred-anycode`, is enabled, and starts with the default `code` and `cursor` keywords. Source workflow preferences are never copied into the release metadata.
+The production package is written to `.release/package` and the directly installable workflow to `.release/Alfred-AnyCode.alfredworkflow`. The release uses the production Bundle ID `com.wilsonyiyi.alfred-anycode`, starts with the `code` and `cursor` keywords, and includes all runtime dependencies.
 
-Production releases run automatically after a branch is merged or pushed to `main`. The **CI & Release** workflow uses `semantic-release` and Conventional Commit messages to decide whether a release is needed:
+## Releases
 
-- `fix:` releases a patch version;
-- `feat:` releases a minor version;
-- `BREAKING CHANGE:` or `!` releases a major version;
-- documentation, test, build, and maintenance-only commits do not publish a version by default.
+Production releases run automatically when Conventional Commits reach `main`. `semantic-release` determines the next version, updates npm and Alfred metadata, creates the Git tag and GitHub Release, uploads the installable workflow, and publishes to npm through Trusted Publishing (OIDC).
+
+- `fix:` releases a patch version.
+- `feat:` releases a minor version.
+- `BREAKING CHANGE:` or `!` releases a major version.
 
 When using squash merge, keep the pull request title in Conventional Commit format because it becomes the commit analyzed on `main`.
 
-When a release is required, CI updates `package.json`, `package-lock.json`, and Alfred's native workflow version, builds the production package, commits the generated version metadata, creates a matching `vX.Y.Z` tag and GitHub Release, and publishes to npm through Trusted Publishing (OIDC). No version choice or manual workflow dispatch is required.
-
-Configure `alfred-anycode` on npm with this Trusted Publisher before the first automated release:
-
-- Repository: `wilsonyiyi/alfred-anycode`
-- Workflow filename: `release.yml`
-- Allowed action: `npm publish`
-- Environment: leave blank
-
-The repository must allow GitHub Actions read/write workflow permissions and permit the semantic-release bot commit on `main`. No long-lived npm token is required. Publishing or packing the development source directly is rejected to prevent a `.dev` Bundle ID from reaching npm.
-
 ## License and attribution
 
-Alfred AnyCode is licensed under GPL-3.0-or-later. It is based on [vivaxy/alfred-open-in-vscode](https://github.com/vivaxy/alfred-open-in-vscode) and retains the original project's license.
+Alfred AnyCode is licensed under GPL-3.0-or-later. It is based on [vivaxy/alfred-open-in-vscode](https://github.com/vivaxy/alfred-open-in-vscode) and retains the original project’s license.

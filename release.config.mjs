@@ -7,13 +7,19 @@ export default {
     [
       '@semantic-release/exec',
       {
-        prepareCmd: 'node scripts/bump-version.js ${nextRelease.version} && npm run build:release',
+        prepareCmd: 'node scripts/bump-version.js ${nextRelease.version} && npm run build:release && npm run build:workflow',
         publishCmd: 'npm publish .release/package --access public',
       },
     ],
     [
       '@semantic-release/github',
       {
+        assets: [
+          {
+            label: 'Install Alfred AnyCode',
+            path: '.release/Alfred-AnyCode.alfredworkflow',
+          },
+        ],
         failComment: false,
         successComment: false,
       },
