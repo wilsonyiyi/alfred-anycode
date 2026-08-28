@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import fs from 'node:fs';
-import {spawnSync} from 'node:child_process';
+import plistParser from 'plist';
 
 const MANAGER_SCRIPT_FILTER_UID = 'A230553D-D083-45EE-AAFD-02C49F29CED6';
 const EDITOR_SCRIPT_FILTER_UID = '46CF5385-7B12-47EC-A34B-D36168267B0A';
@@ -45,22 +45,13 @@ for (const file of requiredFiles) {
   }
 }
 
-const plistResult = spawnSync('/usr/bin/plutil', ['-lint', 'info.plist'], {
-  encoding: 'utf8',
-});
-if (plistResult.status !== 0) {
-  throw new Error(plistResult.stderr || plistResult.stdout || 'Invalid info.plist');
+const plist = fs.readFileSync('info.plist', 'utf8');
+let workflow;
+try {
+  workflow = plistParser.parse(plist);
+} catch (error) {
+  throw new Error('Invalid info.plist', {cause: error});
 }
-
-const plistJsonResult = spawnSync(
-  '/usr/bin/plutil',
-  ['-convert', 'json', '-o', '-', 'info.plist'],
-  {encoding: 'utf8'},
-);
-if (plistJsonResult.status !== 0) {
-  throw new Error(plistJsonResult.stderr || 'Unable to inspect info.plist');
-}
-const workflow = JSON.parse(plistJsonResult.stdout);
 const scriptFilters = workflow.objects.filter(object => (
   object.type === 'alfred.workflow.input.scriptfilter'
 ));
@@ -114,8 +105,6 @@ if (packageJson.dependencies?.alfy) {
 if (packageJson.dependencies?.['alfred-link']) {
   throw new Error('The workflow must use the dependency-free safe workflow linker.');
 }
-
-const plist = fs.readFileSync('info.plist', 'utf8');
 
 if (plist.includes('default_ide') || plist.includes('editor_shortcuts')) {
   throw new Error('The workflow must not reintroduce a default IDE or shortcut model.');
