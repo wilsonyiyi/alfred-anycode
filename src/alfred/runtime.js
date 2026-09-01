@@ -28,6 +28,17 @@ function createCache(cacheDirectory) {
   };
 }
 
+export function parseWorkflowInput(input) {
+  const normalizedInput = String(input ?? '').trim();
+  const tokens = normalizedInput ? normalizedInput.split(/\s+/u) : [];
+  const queryTokens = tokens.filter(token => token.toLocaleLowerCase() !== ':refresh');
+
+  return {
+    query: queryTokens.join(' '),
+    refresh: queryTokens.length !== tokens.length,
+  };
+}
+
 const cacheDirectory = process.env.alfred_workflow_cache
   || path.join(os.tmpdir(), 'alfred-anycode-cache');
 

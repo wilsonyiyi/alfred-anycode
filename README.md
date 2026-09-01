@@ -12,7 +12,7 @@ Search projects and open the selected result via an editor keyword, such as `cod
 
 - <kbd>↩</kbd> Open the project in the selected editor.
 - <kbd>⌘</kbd><kbd>↩</kbd> Reveal the project in Finder.
-- Append `:refresh` to rebuild the project cache, for example `code :refresh`.
+- Add `:refresh` anywhere in the query to rebuild the project cache, for example `code :refresh`, `code anycode :refresh`, or `code :refresh anycode`. AnyCode immediately shows refresh progress, then a success count or failure message. Keep typing before or after the command to continue searching, or press Return on the confirmation item to remove `:refresh` automatically while preserving the search text.
 
 Open AnyCode Settings via the `anycode` keyword to choose project directories, editors, and keywords.
 
