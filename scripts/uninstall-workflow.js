@@ -5,6 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {resolveAlfredPreferences, unlinkWorkflow} from '../src/install/workflow-link.js';
+import {logger, paint} from './logger.js';
 
 const packageRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const packageJson = JSON.parse(await fs.readFile(path.join(packageRoot, 'package.json'), 'utf8'));
@@ -19,6 +20,8 @@ const result = await unlinkWorkflow({
   preferencesRoot,
 });
 
-console.log(result.removed
-  ? `Unlinked Alfred workflow at ${result.destination}`
-  : `No matching Alfred workflow link was removed (${result.reason}).`);
+if (result.removed) {
+  logger.success(`Unlinked Alfred workflow at ${paint.path(result.destination)}`);
+} else {
+  logger.info(`No matching Alfred workflow link was removed (${paint.reason(result.reason)}).`);
+}

@@ -3,6 +3,7 @@
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {bumpPackageVersion} from '../src/release/version.js';
+import {logger, paint} from './logger.js';
 
 const release = process.argv[2];
 if (!release) {
@@ -11,5 +12,6 @@ if (!release) {
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const result = await bumpPackageVersion({release, root});
-console.log(`version=${result.version}`);
-console.log(`changed=${result.changed}`);
+logger.success(result.changed
+  ? `Version updated to ${paint.version(result.version)}`
+  : `Version is already ${paint.version(result.version)}`);

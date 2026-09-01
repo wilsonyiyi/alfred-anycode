@@ -6,24 +6,32 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {
   assertUnprivilegedInstall,
+  isGlobalNpmInstall,
   linkWorkflow,
   resolveAlfredPreferences,
 } from '../src/install/workflow-link.js';
+import {logger, paint} from './logger.js';
 
-assertUnprivilegedInstall();
-const packageRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const packageJson = JSON.parse(await fs.readFile(path.join(packageRoot, 'package.json'), 'utf8'));
-const preferencesRoot = await resolveAlfredPreferences({
-  fileSystem: fs,
-  homeDirectory: os.homedir(),
-});
-const result = await linkWorkflow({
-  fileSystem: fs,
-  packageName: packageJson.name,
-  packageRoot,
-  preferencesRoot,
-});
+if (!isGlobalNpmInstall()) {
+  logger.info(`Installed local dependencies. Run ${paint.command('npm run dev')} to use this source in Alfred.`);
+} else {
+  assertUnprivilegedInstall();
+  const packageRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+  const packageJson = JSON.parse(await fs.readFile(path.join(packageRoot, 'package.json'), 'utf8'));
+  const preferencesRoot = await resolveAlfredPreferences({
+    fileSystem: fs,
+    homeDirectory: os.homedir(),
+  });
+  const result = await linkWorkflow({
+    fileSystem: fs,
+    packageName: packageJson.name,
+    packageRoot,
+    preferencesRoot,
+  });
 
-console.log(result.created
-  ? `Linked Alfred workflow at ${result.destination}`
-  : `Alfred workflow is already installed at ${result.destination}`);
+  if (result.created) {
+    logger.success(`Linked Alfred workflow at ${paint.path(result.destination)}`);
+  } else {
+    logger.info(`Alfred workflow is already installed at ${paint.path(result.destination)}`);
+  }
+}

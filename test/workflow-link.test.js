@@ -5,6 +5,7 @@ import path from 'node:path';
 import test from 'node:test';
 import {
   assertUnprivilegedInstall,
+  isGlobalNpmInstall,
   linkWorkflow,
   resolveAlfredPreferences,
   unlinkWorkflow,
@@ -34,6 +35,12 @@ test('assertUnprivilegedInstall rejects root and sudo installs', () => {
   assert.doesNotThrow(
     () => assertUnprivilegedInstall({environment: {}, userId: 501}),
   );
+});
+
+test('isGlobalNpmInstall only enables automatic linking for global npm installs', () => {
+  assert.equal(isGlobalNpmInstall({environment: {npm_config_global: 'true'}}), true);
+  assert.equal(isGlobalNpmInstall({environment: {npm_config_global: 'false'}}), false);
+  assert.equal(isGlobalNpmInstall({environment: {}}), false);
 });
 
 test('resolveAlfredPreferences prefers explicit Alfred environment configuration', async () => {

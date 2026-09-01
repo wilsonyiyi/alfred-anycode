@@ -2,6 +2,7 @@
 
 import fs from 'node:fs';
 import plistParser from 'plist';
+import {logger} from './logger.js';
 
 const MANAGER_SCRIPT_FILTER_UID = 'A230553D-D083-45EE-AAFD-02C49F29CED6';
 const EDITOR_SCRIPT_FILTER_UID = '46CF5385-7B12-47EC-A34B-D36168267B0A';
@@ -25,6 +26,8 @@ const requiredFiles = [
   'scripts/run-action.js',
   'scripts/run-node.sh',
   'scripts/install-workflow.js',
+  'scripts/logger.js',
+  'scripts/switch-workflow.js',
   'src/config/config-store.js',
   'src/config/editor-config.js',
   'src/config/keyword-sync.js',
@@ -36,6 +39,7 @@ const requiredFiles = [
   'src/ides/editor-icon.js',
   'src/ides/editor-registry.js',
   'src/install/workflow-link.js',
+  'src/install/workflow-mode.js',
   'src/release/release-package.js',
   'src/release/alfred-workflow.js',
   'src/release/version.js',
@@ -123,4 +127,4 @@ if (!/<key>userconfigurationconfig<\/key>\s*<array\/>/u.test(plist)) {
   throw new Error('Dynamic settings must not be duplicated in Alfred native configuration fields.');
 }
 
-console.log('Workflow structure and info.plist are valid.');
+logger.success('Workflow structure and info.plist are valid.');

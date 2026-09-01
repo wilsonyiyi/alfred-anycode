@@ -39,9 +39,24 @@ Alternatively, install or update from npm:
 npm install --global alfred-anycode
 ```
 
-The npm installer creates one package-owned symbolic link in Alfred’s active preferences directory. It never replaces an existing workflow directory or a link to another target. Run it as your macOS user, without `sudo`.
+The global npm installer creates one package-owned symbolic link in Alfred’s active preferences directory. It never replaces an existing workflow directory or a link to another target. Run it as your macOS user, without `sudo`.
 
-For local development, clone the repository into an Alfred workflow folder, run `npm install`, and open the workflow in Alfred Preferences. The source workflow uses the development-only Bundle ID `com.wilsonyiyi.alfred-anycode.dev`, so it can coexist with an installed release.
+For local development, keep the repository in a normal source directory and install its dependencies:
+
+```sh
+git clone git@github.com:wilsonyiyi/alfred-anycode.git ~/playground/alfred-anycode
+cd ~/playground/alfred-anycode
+npm install
+```
+
+Switch Alfred to the local source and back to the preserved release with two short commands:
+
+```sh
+npm run dev
+npm run prod
+```
+
+Both modes use the same `workflows/alfred-anycode` slot, so Alfred only displays one AnyCode workflow. `npm run mode` reports the active mode. The release directory is moved intact to `~/Library/Application Support/AnyCode/Workflow Release Backups` while development mode is active; workflow data and cache are not deleted.
 
 ## Features
 

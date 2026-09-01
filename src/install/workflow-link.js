@@ -45,6 +45,10 @@ export function assertUnprivilegedInstall({
   }
 }
 
+export function isGlobalNpmInstall({environment = process.env} = {}) {
+  return environment.npm_config_global === 'true';
+}
+
 export async function resolveAlfredPreferences({
   fileSystem,
   environment = process.env,
