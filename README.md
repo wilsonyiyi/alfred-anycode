@@ -54,9 +54,11 @@ Switch Alfred to the local source and back to the preserved release with two sho
 ```sh
 npm run dev
 npm run prod
+npm run mode
+npm run doctor
 ```
 
-Both modes use the same `workflows/alfred-anycode` slot, so Alfred only displays one AnyCode workflow. `npm run mode` reports the active mode. The release directory is moved intact to `~/Library/Application Support/AnyCode/Workflow Release Backups` while development mode is active; workflow data and cache are not deleted.
+Both modes use the same Alfred workflow slot, so Alfred only displays one AnyCode workflow. `npm run mode` reports the active mode, while `npm run doctor` prints the resolved slot, source, backup, and Bundle IDs. [`alfred-workflow-switch`](https://github.com/wilsonyiyi/alfred-workflow-switch) is installed as a development dependency and preserves the release under the active Alfred Preferences directory while development mode is active; workflow data and cache are not deleted.
 
 ## Features
 
