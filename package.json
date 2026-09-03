@@ -13,13 +13,13 @@
     "build:workflow": "node scripts/build-workflow.js",
     "check": "npm test && npm run validate",
     "dev": "alfred-workflow-switch dev",
-    "doctor": "alfred-workflow-switch doctor",
     "mode": "alfred-workflow-switch status",
+    "prod": "alfred-workflow-switch prod",
+    "doctor": "alfred-workflow-switch doctor",
     "postinstall": "node scripts/install-workflow.js",
     "prepack": "node scripts/assert-publishable.js",
     "prepublishOnly": "npm run check && node scripts/assert-publishable.js",
     "preuninstall": "node scripts/uninstall-workflow.js",
-    "prod": "alfred-workflow-switch prod",
     "release": "semantic-release",
     "test": "node --test",
     "validate": "node scripts/validate-workflow.js",
@@ -80,7 +80,7 @@
   "devDependencies": {
     "@semantic-release/exec": "^7.1.0",
     "@semantic-release/git": "^11.0.1",
-    "alfred-workflow-switch": "^0.1.0",
+    "alfred-workflow-switch": "^0.2.0",
     "plist": "^3.1.1",
     "semantic-release": "^25.0.9"
   }

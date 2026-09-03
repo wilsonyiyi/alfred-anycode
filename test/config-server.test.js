@@ -23,6 +23,8 @@ test('configuration page is bilingual, uses workflow branding, and ships valid J
   assert.match(page, /id="add-directory"/u);
   assert.match(page, /id="editor-picker"/u);
   assert.match(page, /className = 'keyword-control'/u);
+  assert.match(page, /className = 'keyword-fields'/u);
+  assert.match(page, /className = 'editor-window-mode'/u);
   assert.match(page, /className = 'editor-action danger'/u);
   assert.match(page, /className = 'keyword-example'/u);
   assert.match(page, /addEventListener\('drop'/u);
@@ -38,6 +40,8 @@ test('configuration page is bilingual, uses workflow branding, and ships valid J
   assert.match(page, /class="button primary" id="save" type="button" disabled/u);
   assert.equal(TRANSLATIONS.en.save, 'Save changes');
   assert.equal(TRANSLATIONS.zh.save, '保存更改');
+  assert.equal(TRANSLATIONS.en.cursorWindowAgents, 'Agents Window');
+  assert.equal(TRANSLATIONS.zh.cursorWindowAgents, 'Agents 窗口');
   assert.equal(TRANSLATIONS.zh.iconUnsupported, '请使用 PNG、JPEG、WebP、GIF 或 ICNS 图片。');
   assert.ok(script);
   assert.doesNotThrow(() => new vm.Script(script));
@@ -160,6 +164,8 @@ test('configuration server saves dynamic editors, icon images, and Alfred keywor
   assert.equal(reloadCalls.length, 2);
 
   const saved = JSON.parse(await fs.readFile(path.join(dataDirectory, 'config.json'), 'utf8'));
+  assert.equal(saved.editors[0].windowMode, 'default');
+  assert.equal(saved.editors[1].windowMode, undefined);
   assert.equal(saved.editors[1].iconUpload, undefined);
   assert.match(saved.editors[0].iconPath, /cursor-\d+\.png$/u);
   assert.match(saved.editors[1].iconPath, /nova-\d+\.png$/u);

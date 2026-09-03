@@ -1,9 +1,18 @@
+function editorPayload(editor) {
+  return {
+    applicationName: editor.applicationName,
+    id: editor.id,
+    label: editor.label,
+    ...(editor.windowMode && editor.windowMode !== 'default'
+      ? {windowMode: editor.windowMode}
+      : {}),
+  };
+}
+
 export function createActionArgument({action, editor, projectPath}) {
   return JSON.stringify({
     action,
-    editor: editor
-      ? {applicationName: editor.applicationName, id: editor.id, label: editor.label}
-      : undefined,
+    editor: editor ? editorPayload(editor) : undefined,
     path: projectPath,
   });
 }

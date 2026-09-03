@@ -19,10 +19,10 @@ test('createDefaultEditorConfig starts with VS Code and Cursor', () => {
   assert.deepEqual(config.projectPatterns, [...DEFAULT_PROJECT_PATTERNS]);
   assert.deepEqual(DEFAULT_EDITOR_TYPES, ['vscode', 'cursor']);
   assert.deepEqual(
-    config.editors.map(editor => [editor.type, editor.keywordExpression]),
+    config.editors.map(editor => [editor.type, editor.keywordExpression, editor.windowMode]),
     [
-      ['vscode', 'code'],
-      ['cursor', 'cursor'],
+      ['vscode', 'code', undefined],
+      ['cursor', 'cursor', 'default'],
     ],
   );
 });
@@ -97,6 +97,20 @@ test('disabled editors may keep incomplete keywords without joining the active r
   assert.equal(config.editors[1].keywordExpression, '');
 });
 
+test('normalizeEditorConfig keeps Cursor window mode and ignores it on other editors', () => {
+  const config = normalizeEditorConfig({
+    editors: [
+      {applicationName: 'Cursor', id: 'cursor', keywordExpression: 'c', type: 'cursor', windowMode: 'agents'},
+      {applicationName: 'Visual Studio Code', id: 'vscode', keywordExpression: 'code', type: 'vscode', windowMode: 'ide'},
+      {applicationName: 'Cursor', id: 'cursor-bad', keywordExpression: 'cu', type: 'cursor', windowMode: 'panel'},
+    ],
+  });
+
+  assert.equal(config.editors[0].windowMode, 'agents');
+  assert.equal(config.editors[1].windowMode, undefined);
+  assert.equal(config.editors[2].windowMode, 'default');
+});
+
 test('configuration store persists JSON and readWorkflowConfig consumes it', async t => {
   const dataDirectory = await fs.mkdtemp(path.join(os.tmpdir(), 'anycode-config-'));
   t.after(() => fs.rm(dataDirectory, {force: true, recursive: true}));
@@ -109,6 +123,7 @@ test('configuration store persists JSON and readWorkflowConfig consumes it', asy
   const config = await readWorkflowConfig({ANYCODE_DATA_DIR: dataDirectory, HOME: '/Users/example'});
   assert.deepEqual(config.projectPatterns, ['~/Source/*']);
   assert.equal(config.editorDefinitions[0].keywordExpression, 'c');
+  assert.equal(config.editorDefinitions[0].windowMode, 'default');
 });
 
 test('parseProjectPatterns accepts comma, semicolon, and newline separators', () => {

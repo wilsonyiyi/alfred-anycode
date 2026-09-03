@@ -37,6 +37,7 @@ function normalizeEditor(editor) {
     id: String(editor.id),
     keyword: parseEditorKeyword(editor.keywordExpression),
     label: applicationName,
+    windowMode: editor.windowMode,
   };
 }
 

@@ -288,7 +288,7 @@ export function renderConfigPage({token}) {
     .editor-card {
       min-width: 0;
       display: grid;
-      grid-template-columns: minmax(180px, .72fr) minmax(440px, 1fr) auto;
+      grid-template-columns: minmax(160px, .6fr) minmax(520px, 1fr) auto;
       align-items: center;
       gap: 14px;
     }
@@ -368,13 +368,27 @@ export function renderConfigPage({token}) {
     .keyword-control {
       min-width: 0;
       display: grid;
-      grid-template-columns: auto minmax(100px, 160px) minmax(160px, 1fr);
+      grid-template-columns: auto minmax(260px, 1.4fr) minmax(120px, 1fr);
       align-items: center;
       gap: 6px 10px;
     }
     .keyword-heading { display: inline-flex; align-items: center; white-space: nowrap; }
     .keyword-label { color: var(--muted); font-size: 11px; font-weight: 650; }
-    .editor-keyword { min-width: 0; min-height: 36px; padding-block: 7px; }
+    .keyword-fields {
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .editor-keyword { min-width: 0; min-height: 36px; padding-block: 7px; flex: 1 1 auto; }
+    .editor-window-mode {
+      width: auto;
+      min-width: 118px;
+      max-width: 168px;
+      flex: 0 0 138px;
+      min-height: 36px;
+      padding-block: 7px;
+    }
     .editor-keyword[aria-invalid="true"] { border-color: var(--danger); background: var(--danger-soft); }
     .keyword-example { min-width: 0; overflow: hidden; color: var(--muted); font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
     .editor-error { grid-column: 2 / 4; color: var(--danger); font-size: 11px; }
@@ -757,6 +771,7 @@ export function renderConfigPage({token}) {
         keywordExpression: editor.keywordExpression,
         type: editor.type,
       };
+      if (editor.type === 'cursor') value.windowMode = editor.windowMode || 'default';
       if (editor.iconUpload) value.iconUpload = editor.iconUpload;
       return value;
     }
@@ -985,7 +1000,7 @@ export function renderConfigPage({token}) {
         return;
       }
       for (const type of installedTypes) {
-        const configured = configuredTypes.has(type);
+        const configured = type !== 'cursor' && configuredTypes.has(type);
         const option = document.createElement('button');
         option.type = 'button';
         option.className = 'picker-option';
@@ -1008,6 +1023,7 @@ export function renderConfigPage({token}) {
               applicationName: preset.applicationName,
               keywordExpression: uniqueKeyword(preset.defaultKeyword),
               type,
+              ...(type === 'cursor' ? {windowMode: 'default'} : {}),
             });
           });
         }
@@ -1112,7 +1128,7 @@ export function renderConfigPage({token}) {
         if (appMissing || editor.enabled === false) meta.append(editorState);
         identity.append(iconControl, meta);
 
-        const keywordControl = document.createElement('label');
+        const keywordControl = document.createElement('div');
         keywordControl.className = 'keyword-control';
         const keywordHeading = document.createElement('span');
         keywordHeading.className = 'keyword-heading';
@@ -1132,13 +1148,34 @@ export function renderConfigPage({token}) {
           editor.keywordExpression = keyword.value;
           updateDirtyState();
         });
+        const keywordFields = document.createElement('div');
+        keywordFields.className = 'keyword-fields';
+        keywordFields.append(keyword);
+        if (editor.type === 'cursor') {
+          const windowMode = document.createElement('select');
+          windowMode.className = 'editor-window-mode';
+          windowMode.setAttribute('aria-label', t('cursorWindowMode'));
+          windowMode.setAttribute('title', t('cursorWindowMode'));
+          for (const [value, key] of [['default', 'cursorWindowDefault'], ['ide', 'cursorWindowIde'], ['agents', 'cursorWindowAgents']]) {
+            const option = document.createElement('option');
+            option.value = value;
+            option.textContent = t(key);
+            windowMode.append(option);
+          }
+          windowMode.value = editor.windowMode || 'default';
+          windowMode.addEventListener('change', () => {
+            editor.windowMode = windowMode.value;
+            updateDirtyState();
+          });
+          keywordFields.append(windowMode);
+        }
         const keywordExample = document.createElement('span');
         keywordExample.className = 'keyword-example';
         const error = document.createElement('div');
         error.className = 'editor-error';
         error.id = 'editor-error-' + editor.id;
         keyword.setAttribute('aria-describedby', error.id);
-        keywordControl.append(keywordHeading, keyword, keywordExample, error);
+        keywordControl.append(keywordHeading, keywordFields, keywordExample, error);
 
         const actions = document.createElement('div');
         actions.className = 'editor-actions';

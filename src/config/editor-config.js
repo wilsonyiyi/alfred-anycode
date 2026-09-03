@@ -18,6 +18,17 @@ export const EDITOR_TYPES = Object.freeze({
   custom: Object.freeze({applicationName: '', defaultKeyword: '', label: 'Custom application'}),
 });
 
+export const CURSOR_WINDOW_MODES = Object.freeze(['default', 'ide', 'agents']);
+export const CURSOR_WINDOW_FLAGS = Object.freeze({
+  agents: '--glass',
+  ide: '--classic',
+});
+
+export function parseCursorWindowMode(value) {
+  const mode = String(value ?? 'default').trim();
+  return CURSOR_WINDOW_MODES.includes(mode) ? mode : 'default';
+}
+
 export const DEFAULT_EDITOR_TYPES = Object.freeze(['vscode', 'cursor']);
 const PRESET_EDITOR_ORDER = Object.freeze(['vscode', 'cursor', 'zed', 'webstorm', 'codex']);
 
@@ -63,6 +74,7 @@ function normalizeEditor(editor, {migrateAliases = false} = {}) {
     id: String(editor.id ?? '').trim() || crypto.randomUUID(),
     keywordExpression,
     type,
+    ...(type === 'cursor' ? {windowMode: parseCursorWindowMode(editor.windowMode)} : {}),
   };
 }
 
@@ -144,5 +156,6 @@ export function editorDefinitions(config) {
     iconPath: editor.iconPath,
     id: editor.id,
     keywordExpression: editor.keywordExpression,
+    ...(editor.type === 'cursor' ? {windowMode: parseCursorWindowMode(editor.windowMode)} : {}),
   }));
 }

@@ -32,6 +32,20 @@ test('createEditorRegistry resolves each IDE independently by used keyword', () 
 
   assert.equal(registry.resolve('code').applicationName, 'Visual Studio Code');
   assert.equal(registry.resolve('CURSOR').applicationName, 'Cursor');
+  assert.equal(registry.resolve('cursor').windowMode, undefined);
+});
+
+test('createEditorRegistry preserves Cursor window mode', () => {
+  const registry = createEditorRegistry([
+    definition({
+      applicationName: 'Cursor',
+      id: 'cursor',
+      keywordExpression: 'cursor',
+      windowMode: 'agents',
+    }),
+  ]);
+
+  assert.equal(registry.resolve('cursor').windowMode, 'agents');
 });
 
 test('createEditorRegistry rejects ambiguous duplicate keywords', () => {

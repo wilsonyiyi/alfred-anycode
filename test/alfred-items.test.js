@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
+  buildProjectItems,
   buildRefreshErrorItem,
   buildRefreshItem,
   buildRefreshLoadingItem,
@@ -34,5 +35,24 @@ test('refresh items expose explicit loading and error states', () => {
     title: 'Project cache refresh failed',
     uid: 'project-cache-refresh-failed',
     valid: false,
+  });
+});
+
+test('buildProjectItems includes Cursor window mode only when it is not the default', () => {
+  const editor = {
+    applicationName: 'Cursor',
+    id: 'cursor',
+    label: 'Cursor',
+    windowMode: 'agents',
+  };
+  const [item] = buildProjectItems(
+    [{absolutePath: '/Code/demo', name: 'demo'}],
+    editor,
+  );
+
+  assert.deepEqual(JSON.parse(item.arg), {
+    action: 'open',
+    editor: {applicationName: 'Cursor', id: 'cursor', label: 'Cursor', windowMode: 'agents'},
+    path: '/Code/demo',
   });
 });

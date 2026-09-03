@@ -23,7 +23,7 @@ Open AnyCode Settings via the `anycode` keyword to choose project directories, e
 AnyCode Settings has two focused sections:
 
 - **Project directories** uses the native macOS directory picker. Expand **Advanced rules** to edit glob patterns directly.
-- **Editors** configures one Alfred keyword per editor. Visual Studio Code and Cursor are included by default; Zed, WebStorm, Codex, and other macOS applications can be added.
+- **Editors** configures one Alfred keyword per editor. Visual Studio Code and Cursor are included by default; Zed, WebStorm, Codex, and other macOS applications can be added. Cursor editors can choose **Follow Cursor**, **IDE**, or **Agents Window**.
 
 Installed editors are detected through known application paths and Spotlight. Editors can be enabled, disabled, or removed without affecting the shared project list. Click an editor icon or drop a PNG, JPEG, WebP, GIF, or ICNS image onto it to replace the artwork. Choosing another macOS application imports its Finder icon automatically.
 
@@ -63,6 +63,7 @@ Both modes use the same Alfred workflow slot, so Alfred only displays one AnyCod
 ## Features
 
 - Use multiple editors at the same time with independent Alfred keywords.
+- Choose Cursor’s IDE or Agents Window when opening a project.
 - Add project folders through the native picker or advanced glob rules.
 - Search project names and paths with Unicode-aware fuzzy matching.
 - Cache project discovery for fast repeated searches.
